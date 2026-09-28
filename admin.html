@@ -42,7 +42,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 .f{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
 .f>span{font-weight:700;font-size:13.5px}
 .f small{color:var(--mut);font-size:12.5px}
-.f input[type=text],.f input[type=url],.f input[type=datetime-local],.f textarea,.f select{
+.f input[type=text],.f input[type=password],.f input[type=url],.f input[type=datetime-local],.f textarea,.f select{
   border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;width:100%}
 .f input[type=color]{width:54px;height:38px;border:1px solid var(--line);border-radius:10px;padding:2px;background:#fff}
 .f.chk{flex-direction:row;align-items:center;gap:8px}
@@ -100,7 +100,8 @@ code{background:#eef3ee;border-radius:6px;padding:1px 6px;font-size:13px;directi
   <h1>لوحة تحكم Safe Zone</h1>
   <span class="st" id="draftState"></span>
   <button class="btn" id="btnRestore" title="يحمّل النسخة المنشورة من config.json ويلغي المسودة">استرجاع المنشور</button>
-  <button class="btn pri" id="btnDownload">تحميل config.json</button>
+  <button class="btn" id="btnDownload">تحميل config.json</button>
+  <button class="btn pri" id="btnPublish">نشر على الموقع</button>
 </div>
 
 <div class="layout">
@@ -144,12 +145,15 @@ code{background:#eef3ee;border-radius:6px;padding:1px 6px;font-size:13px;directi
 
     <section class="panel" id="p-publish" data-title="النشر">
       <h2>النشر</h2>
-      <p class="sub">كل تعديلاتك بتتحفظ كمسودة في المتصفح، ولحد ما تنشرها الصفحة الحقيقية مبتتغيرش.</p>
-      <ol class="how">
-        <li>اضغط <b>تحميل config.json</b>.</li>
-        <li>ارفع الملف مكان <code>config.json</code> القديم في الاستضافة (Cloudflare Pages أو GitHub أو Netlify).</li>
-        <li>افتح الصفحة، والتعديل يظهر في ثواني.</li>
-      </ol>
+      <p class="sub">تعديلاتك بتتحفظ كمسودة في المتصفح، والصفحة الحقيقية مبتتغيرش غير لما تضغط <b>نشر على الموقع</b>. بعد النشر التعديل بيظهر خلال دقيقة تقريبًا.</p>
+      <div id="ghBox"></div>
+      <div class="group">
+        <h3>النشر اليدوي (بديل)</h3>
+        <ol class="how">
+          <li>اضغط <b>تحميل config.json</b>.</li>
+          <li>في المستودع على GitHub اضغط <b>Add file</b> ثم <b>Upload files</b> وارفع الملف، وبعدها <b>Commit changes</b>.</li>
+        </ol>
+      </div>
       <div class="add">
         <button class="btn pri" id="btnDownload2">تحميل config.json</button>
         <button class="btn" id="btnCopy">نسخ JSON</button>
@@ -400,6 +404,61 @@ async function loadPublished(silent) {
   } catch (e) { if (!silent) toast('مفيش config.json منشور لسه'); return false; }
 }
 $('#btnRestore').onclick = () => { if (confirm('ده هيمسح المسودة ويحمّل النسخة المنشورة. متأكد؟')) loadPublished(false); };
+
+/* ---------- النشر المباشر على GitHub ---------- */
+const GH_KEY = 'sz-gh-v1';
+const guess = {
+  owner: location.hostname.endsWith('.github.io') ? location.hostname.split('.')[0] : '',
+  repo: (location.pathname.split('/')[1] || '').endsWith('.html') ? '' : (location.pathname.split('/')[1] || ''),
+  branch: 'main', token: ''
+};
+let gh = { ...guess };
+try { gh = { ...guess, ...JSON.parse(localStorage.getItem(GH_KEY) || '{}') }; } catch (e) { }
+const saveGH = () => { try { localStorage.setItem(GH_KEY, JSON.stringify(gh)); } catch (e) { } };
+
+function buildGH() {
+  const b = $('#ghBox'); b.innerHTML = '';
+  b.append(h('div', { class: 'group' }, h('h3', {}, 'النشر المباشر بضغطة واحدة'),
+    h('div', { class: 'row2' }, field('اسم حساب GitHub', gh, 'owner', { on: saveGH }), field('اسم المستودع', gh, 'repo', { on: saveGH })),
+    field('GitHub Token', gh, 'token', { type: 'password', on: saveGH, hint: 'بيتخزن في متصفحك ده بس، ومش بيتكتب في أي ملف على الموقع.' }),
+    h('div', { class: 'note', html:
+      '<b>إزاي تجيب الـ Token (مرة واحدة بس):</b>' +
+      '<ol class="how" style="margin-top:6px">' +
+      '<li>افتح <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a></li>' +
+      '<li>في <b>Token name</b> اكتب <code>safezone-links</code>، وفي <b>Expiration</b> اختار أطول مدة متاحة.</li>' +
+      '<li>في <b>Repository access</b> اختار <b>Only select repositories</b> وبعدها <code>safezone-links</code>.</li>' +
+      '<li>افتح <b>Permissions</b> ثم <b>Repository permissions</b>، وخلي <b>Contents</b> على <b>Read and write</b>.</li>' +
+      '<li>اضغط <b>Generate token</b>، وانسخ الكود والصقه في خانة Token فوق.</li></ol>' }),
+    h('div', { class: 'add' }, ctlBtn('نشر على الموقع الآن', publishGH, 'pri'))));
+}
+
+async function publishGH() {
+  if (!gh.token || !gh.owner || !gh.repo) { showTab('p-publish'); toast('كمّل بيانات GitHub الأول'); return; }
+  const api = `https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}/contents/config.json`;
+  const H = { Authorization: 'Bearer ' + gh.token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
+  const bytes = new TextEncoder().encode(JSON.stringify(cfg, null, 2));
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  const content = btoa(bin);
+  const btns = [$('#btnPublish')]; btns.forEach(b => { b.disabled = true; });
+  toast('جاري النشر...');
+  try {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      let sha;
+      const r = await fetch(api + '?ref=' + encodeURIComponent(gh.branch || 'main') + '&t=' + Date.now(), { headers: H, cache: 'no-store' });
+      if (r.ok) sha = (await r.json()).sha; else if (r.status !== 404) throw r.status;
+      const p = await fetch(api, { method: 'PUT', headers: { ...H, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Update config from dashboard', content, sha, branch: gh.branch || 'main' }) });
+      if (p.ok) { toast('اتنشر. التعديل هيظهر خلال دقيقة'); return; }
+      if (p.status !== 409 && p.status !== 422) throw p.status;
+    }
+    throw 409;
+  } catch (e) {
+    const msg = e === 401 ? 'الـ Token غلط أو منتهي' : (e === 403 || e === 404) ? 'اتأكد من اسم المستودع وإن صلاحية Contents على Read and write' : 'فشل النشر (' + e + ')';
+    showTab('p-publish'); toast(msg);
+  } finally { btns.forEach(b => { b.disabled = false; }); }
+}
+$('#btnPublish').onclick = publishGH;
+buildGH();
 
 /* تبويبات */
 const panels = [...document.querySelectorAll('.panel')];
