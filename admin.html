@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>لوحة تحكم Safe Zone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#2a9d2f;--gd:#1f7a24;--ink:#1c2a1e;--mut:#6b7a6d;--line:#dfe8e0;--bg:#f2f6f2;--card:#fff;--red:#d8352f}
+body{font-family:'Cairo',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
+
+.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;padding:10px 16px;flex-wrap:wrap}
+.top h1{font-size:18px;font-weight:800;margin-inline-end:auto}
+.top .st{font-size:13px;color:var(--mut)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;font-weight:700;font-size:14px}
+.btn:hover{border-color:var(--g)}
+.btn.pri{background:var(--g);border-color:var(--g);color:#fff}
+.btn.pri:hover{background:var(--gd)}
+.btn.dng{color:var(--red)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #9bd39e;outline-offset:2px}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;max-width:1120px;margin:0 auto;padding:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 16px;font-weight:700;font-size:14px;color:var(--mut)}
+.tab[aria-selected=true]{background:var(--g);border-color:var(--g);color:#fff}
+.panel{display:none;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.panel.on{display:block}
+.panel h2{font-size:17px;font-weight:800;margin-bottom:4px}
+.panel .sub{color:var(--mut);font-size:13.5px;margin-bottom:14px}
+.group{border-top:1px solid var(--line);margin-top:16px;padding-top:14px}
+.group:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.group h3{font-size:15px;font-weight:800;margin-bottom:10px}
+
+.f{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.f>span{font-weight:700;font-size:13.5px}
+.f small{color:var(--mut);font-size:12.5px}
+.f input[type=text],.f input[type=url],.f input[type=datetime-local],.f textarea,.f select{
+  border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;width:100%}
+.f input[type=color]{width:54px;height:38px;border:1px solid var(--line);border-radius:10px;padding:2px;background:#fff}
+.f.chk{flex-direction:row;align-items:center;gap:8px}
+.f.chk input{width:18px;height:18px;accent-color:var(--g)}
+.f.chk span{font-size:14.5px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.colors{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px 14px}
+.colors .f{flex-direction:row;align-items:center;justify-content:space-between;margin:0}
+
+.imgf{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.imgf>span{font-weight:700;font-size:13.5px}
+.imgf .r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.imgf img.pv{width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid var(--line);background:#eee}
+.imgf input[type=text]{flex:1;min-width:140px;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.imgf input[type=file]{font-size:13px;max-width:210px}
+
+.item{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:#fbfdfb}
+.item>summary{cursor:pointer;padding:11px 14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:8px}
+.item>summary::-webkit-details-marker{display:none}
+.item>summary::before{content:"▸";color:var(--mut);transition:transform .15s}
+.item[open]>summary::before{transform:rotate(90deg)}
+.item>summary .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item>summary .tag{font-size:12px;font-weight:700;color:var(--mut);background:#eef3ee;border-radius:99px;padding:1px 9px}
+.item .body{padding:4px 14px 12px;border-top:1px solid var(--line)}
+.item .ctl{display:flex;gap:6px;margin:10px 0 12px}
+.add{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.note{background:#fff8e6;border:1px solid #f0dca5;border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:12px}
+ol.how{padding-inline-start:20px;display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+code{background:#eef3ee;border-radius:6px;padding:1px 6px;font-size:13px;direction:ltr;unicode-bidi:embed}
+
+.prev{position:sticky;top:64px;align-self:start}
+.phone{border:10px solid #17211a;border-radius:38px;overflow:hidden;background:#000;height:min(760px,calc(100vh - 100px));box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.phone iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+.prev .cap{text-align:center;color:var(--mut);font-size:12.5px;margin-top:8px}
+.pbtn,.pclose{display:none}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#17211a;color:#fff;padding:10px 18px;border-radius:99px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.toast.on{opacity:1}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .prev{display:none;position:fixed;inset:0;z-index:50;background:rgba(15,25,18,.9);padding:14px;align-items:center;justify-content:center;flex-direction:column}
+  .prev.open{display:flex}
+  .phone{width:min(360px,100%);height:min(680px,calc(100vh - 100px))}
+  .prev .cap{display:none}
+  .pbtn{display:block;position:fixed;bottom:18px;inset-inline-end:18px;z-index:40;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  .pclose{display:block;margin-bottom:10px}
+}
+@media (max-width:520px){.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>لوحة تحكم Safe Zone</h1>
+  <span class="st" id="draftState"></span>
+  <button class="btn" id="btnRestore" title="يحمّل النسخة المنشورة من config.json ويلغي المسودة">استرجاع المنشور</button>
+  <button class="btn pri" id="btnDownload">تحميل config.json</button>
+</div>
+
+<div class="layout">
+  <div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+
+    <section class="panel" id="p-brand" data-title="الهوية والألوان">
+      <h2>الهوية والألوان</h2>
+      <p class="sub">الاسم والوصف واللوجو وألوان الصفحة.</p>
+      <div id="brandBox"></div>
+    </section>
+
+    <section class="panel" id="p-socials" data-title="السوشيال">
+      <h2>أيقونات السوشيال</h2>
+      <p class="sub">بتظهر تحت الوصف مباشرة. للواتساب استخدم رابط بالشكل <code>https://wa.me/20100XXXXXXX</code></p>
+      <div id="socialsBox"></div>
+      <div class="add"><button class="btn" id="addSocial">+ أيقونة جديدة</button></div>
+    </section>
+
+    <section class="panel" id="p-offers" data-title="العروض والعداد">
+      <h2>العروض والعداد</h2>
+      <p class="sub">شريط إعلان وعداد تنازلي. التحكم فيهم بضغطة واحدة وبيختفوا لوحدهم لما الوقت يخلص.</p>
+      <div id="offersBox"></div>
+    </section>
+
+    <section class="panel" id="p-links" data-title="اللينكات">
+      <h2>اللينكات</h2>
+      <p class="sub">رتّب بالأسهم، وأخفي أي لينك من غير ما تمسحه، وحدد له وقت يظهر فيه ويختفي.</p>
+      <div id="linksBox"></div>
+      <div class="add">
+        <button class="btn pri" id="addLink">+ لينك جديد</button>
+        <button class="btn" id="addHeading">+ عنوان قسم</button>
+      </div>
+    </section>
+
+    <section class="panel" id="p-track" data-title="التتبع">
+      <h2>التتبع (البيكسل)</h2>
+      <p class="sub">بيتسجل PageView لكل زيارة، وحدث عند الضغط على أي لينك.</p>
+      <div id="trackBox"></div>
+    </section>
+
+    <section class="panel" id="p-publish" data-title="النشر">
+      <h2>النشر</h2>
+      <p class="sub">كل تعديلاتك بتتحفظ كمسودة في المتصفح، ولحد ما تنشرها الصفحة الحقيقية مبتتغيرش.</p>
+      <ol class="how">
+        <li>اضغط <b>تحميل config.json</b>.</li>
+        <li>ارفع الملف مكان <code>config.json</code> القديم في الاستضافة (Cloudflare Pages أو GitHub أو Netlify).</li>
+        <li>افتح الصفحة، والتعديل يظهر في ثواني.</li>
+      </ol>
+      <div class="add">
+        <button class="btn pri" id="btnDownload2">تحميل config.json</button>
+        <button class="btn" id="btnCopy">نسخ JSON</button>
+        <label class="btn" style="display:inline-block">استيراد config.json<input type="file" id="fileImport" accept=".json,application/json" hidden></label>
+        <button class="btn dng" id="btnReset">إعادة ضبط للافتراضي</button>
+      </div>
+      <div class="note" style="margin-top:14px">صفحة <code>admin.html</code> مش محمية بباسورد. ممكن تغيّر اسمها لاسم سري، أو تحميها مجانًا بـ Cloudflare Access. مفيش حد يقدر ينشر أي تعديل غيرك لأن النشر بيتم برفع الملف على استضافتك.</div>
+    </section>
+  </div>
+
+  <aside class="prev" id="prev">
+    <button class="btn pclose" id="btnClose">إغلاق المعاينة</button>
+    <div class="phone"><iframe id="frame" src="index.html?preview=1" title="معاينة"></iframe></div>
+    <div class="cap">معاينة حية للصفحة</div>
+  </aside>
+</div>
+<button class="btn pri pbtn" id="btnPrev">معاينة</button>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'sz-admin-draft-v1';
+const DEFAULT_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="100" fill="#fff"/>' +
+  '<circle cx="100" cy="100" r="82" fill="none" stroke="#2a9d2f" stroke-width="3"/>' +
+  '<text x="100" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="40" fill="#1fa84a">Safe</text>' +
+  '<text x="100" y="140" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="40" fill="#1fa84a">Zone</text></svg>');
+const DEFAULT = {
+  brand: { name: 'Safezonestore', tagline: 'المنتجات المعلن عنها موجودة\nهنا... في السيف زوون', logo: DEFAULT_LOGO },
+  theme: { bg: '#2a9d2f', bg2: '#238a28', btn: '#ffffff', btnText: '#1f8f26', text: '#ffffff', radius: '14' },
+  socials: [
+    { type: 'tiktok', url: 'https://www.tiktok.com/@' },
+    { type: 'instagram', url: 'https://www.instagram.com/' },
+    { type: 'whatsapp', url: 'https://wa.me/' },
+    { type: 'facebook', url: 'https://www.facebook.com/' }
+  ],
+  announcement: { enabled: false, text: '🔥 خصم خاص لفترة محدودة على كل المنتجات', url: '' },
+  countdown: { enabled: false, title: 'العرض بينتهي خلال', end: '', buttonText: 'اطلب دلوقتي', url: 'https://safe-zone.store', hideWhenEnded: true, endedText: 'العرض انتهى' },
+  links: [
+    { id: 'a1', type: 'link', enabled: true, title: 'للطلب من مصر (متجرنا سيف زوون)', subtitle: '', url: 'https://safe-zone.store', image: DEFAULT_LOGO, badge: '', highlight: false, start: '', end: '' },
+    { id: 'a2', type: 'link', enabled: true, title: 'لطلب أرجيفيت فوكس خارج مصر (دول الخليج وغيرها)', subtitle: '', url: '', image: '', badge: '', highlight: false, start: '', end: '' }
+  ],
+  pixels: { meta: '', tiktok: '' }
+};
+const SOCIAL_TYPES = [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['whatsapp', 'WhatsApp'], ['facebook', 'Facebook'], ['youtube', 'YouTube'], ['telegram', 'Telegram'], ['web', 'موقع'], ['mail', 'إيميل'], ['phone', 'اتصال']];
+
+const $ = s => document.querySelector(s);
+const clone = o => JSON.parse(JSON.stringify(o));
+const uid = () => Math.random().toString(36).slice(2, 8);
+function norm(c) {
+  c = c || {}; const d = clone(DEFAULT);
+  return {
+    brand: { ...d.brand, ...c.brand }, theme: { ...d.theme, ...c.theme },
+    announcement: { ...d.announcement, ...c.announcement }, countdown: { ...d.countdown, ...c.countdown },
+    pixels: { ...d.pixels, ...c.pixels },
+    socials: Array.isArray(c.socials) ? c.socials : d.socials,
+    links: Array.isArray(c.links) ? c.links : d.links
+  };
+}
+function h(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v; else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()) { if (k == null || k === false) continue; e.append(k.nodeType ? k : document.createTextNode(k)); }
+  return e;
+}
+
+let cfg = norm(DEFAULT);
+const frame = $('#frame');
+let frameReady = false, toastT;
+
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2200); }
+function push() {
+  try { localStorage.setItem(KEY, JSON.stringify(cfg)); $('#draftState').textContent = 'مسودة محفوظة في المتصفح'; } catch (e) { $('#draftState').textContent = 'تعذّر حفظ المسودة'; }
+  if (frameReady) frame.contentWindow.postMessage({ type: 'sz-config', config: cfg }, '*');
+}
+window.addEventListener('message', e => { if (e.data && e.data.type === 'sz-ready') { frameReady = true; push(); } });
+
+/* ---------- حقول ---------- */
+function field(label, obj, key, o = {}) {
+  const type = o.type || 'text';
+  const wrap = h('label', { class: 'f' + (type === 'checkbox' ? ' chk' : '') });
+  if (type === 'checkbox') {
+    const i = h('input', { type: 'checkbox' }); i.checked = !!obj[key];
+    i.onchange = () => { obj[key] = i.checked; push(); o.on && o.on(); };
+    wrap.append(i, h('span', {}, label)); return wrap;
+  }
+  let i;
+  if (type === 'textarea') i = h('textarea', { rows: 2 });
+  else if (type === 'select') i = h('select', {}, o.options.map(([v, t]) => h('option', { value: v }, t)));
+  else i = h('input', { type });
+  if (o.ph) i.placeholder = o.ph;
+  i.value = obj[key] ?? '';
+  const upd = () => { obj[key] = i.value; push(); o.on && o.on(i.value); };
+  i.oninput = upd; i.onchange = upd;
+  wrap.append(h('span', {}, label), i);
+  if (o.hint) wrap.append(h('small', {}, o.hint));
+  return wrap;
+}
+function resize(file, max, mime) {
+  return new Promise((res, rej) => {
+    const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      const x = c.getContext('2d');
+      if (mime === 'image/jpeg') { x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); }
+      x.drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u);
+      res(c.toDataURL(mime, .86));
+    };
+    img.onerror = rej; img.src = u;
+  });
+}
+function imageField(label, obj, key, max, mime) {
+  const pv = h('img', { class: 'pv', alt: '' });
+  const url = h('input', { type: 'text', placeholder: 'أو الصق رابط الصورة' });
+  const file = h('input', { type: 'file', accept: 'image/*' });
+  const sync = () => { const v = obj[key] || ''; pv.src = v; pv.style.display = v ? '' : 'none'; url.value = v.startsWith('data:') ? '' : v; };
+  file.onchange = async () => { if (file.files[0]) { try { obj[key] = await resize(file.files[0], max, mime); sync(); push(); } catch (e) { toast('الصورة دي مش شغالة'); } } };
+  url.oninput = () => { obj[key] = url.value.trim(); pv.src = obj[key]; pv.style.display = obj[key] ? '' : 'none'; push(); };
+  const clear = h('button', { class: 'btn sm', type: 'button' }, 'مسح'); clear.onclick = () => { obj[key] = ''; file.value = ''; sync(); push(); };
+  sync();
+  return h('div', { class: 'imgf' }, h('span', {}, label), h('div', { class: 'r' }, pv, file, clear), url);
+}
+function ctlBtn(text, fn, cls = '') { const b = h('button', { class: 'btn sm ' + cls, type: 'button' }, text); b.onclick = fn; return b; }
+function move(arr, i, d, rebuild) { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; rebuild(); push(); }
+
+/* ---------- الأقسام ---------- */
+function buildBrand() {
+  const b = $('#brandBox'); b.innerHTML = '';
+  b.append(
+    field('اسم الصفحة', cfg.brand, 'name'),
+    field('الوصف تحت الاسم', cfg.brand, 'tagline', { type: 'textarea', hint: 'ينفع تكتب سطرين، وكل سطر جديد بيظهر في سطر لوحده.' }),
+    imageField('اللوجو', cfg.brand, 'logo', 320, 'image/png'),
+    h('div', { class: 'group' }, h('h3', {}, 'الألوان والشكل'),
+      h('div', { class: 'colors' },
+        field('خلفية (فوق)', cfg.theme, 'bg', { type: 'color' }),
+        field('خلفية (تحت)', cfg.theme, 'bg2', { type: 'color' }),
+        field('لون الزر', cfg.theme, 'btn', { type: 'color' }),
+        field('لون كتابة الزر', cfg.theme, 'btnText', { type: 'color' }),
+        field('لون الكتابة', cfg.theme, 'text', { type: 'color' })),
+      h('div', { style: 'margin-top:12px' }, field('شكل الأزرار', cfg.theme, 'radius', { type: 'select', options: [['14', 'مدوّر'], ['999', 'كبسولة'], ['6', 'حواف خفيفة']] })),
+      h('small', { style: 'color:var(--mut)' }, 'لو خلّيت لون الخلفية فوق وتحت زي بعض هتاخد لون واحد ثابت.')));
+}
+
+function buildSocials() {
+  const box = $('#socialsBox'); box.innerHTML = '';
+  cfg.socials.forEach((s, i) => {
+    const label = () => (SOCIAL_TYPES.find(t => t[0] === s.type) || [0, s.type])[1];
+    const t = h('span', { class: 't' }, label());
+    const d = h('details', { class: 'item' }, h('summary', {}, t),
+      h('div', { class: 'body' },
+        h('div', { class: 'ctl' }, ctlBtn('↑', () => move(cfg.socials, i, -1, buildSocials)), ctlBtn('↓', () => move(cfg.socials, i, 1, buildSocials)),
+          ctlBtn('حذف', () => { cfg.socials.splice(i, 1); buildSocials(); push(); }, 'dng')),
+        field('النوع', s, 'type', { type: 'select', options: SOCIAL_TYPES, on: () => { t.textContent = label(); } }),
+        field('الرابط', s, 'url', { ph: 'https://' })));
+    box.append(d);
+  });
+}
+
+function buildOffers() {
+  const b = $('#offersBox'); b.innerHTML = '';
+  const a = cfg.announcement, c = cfg.countdown;
+  b.append(
+    h('div', { class: 'group' }, h('h3', {}, 'شريط إعلان أعلى الصفحة'),
+      field('إظهار الشريط', a, 'enabled', { type: 'checkbox' }),
+      field('نص الإعلان', a, 'text'),
+      field('رابط عند الضغط (اختياري)', a, 'url', { ph: 'https://' })),
+    h('div', { class: 'group' }, h('h3', {}, 'عداد تنازلي'),
+      field('إظهار العداد', c, 'enabled', { type: 'checkbox' }),
+      field('عنوان العداد', c, 'title'),
+      field('وقت انتهاء العرض', c, 'end', { type: 'datetime-local', hint: 'بيتحسب بتوقيت جهاز الزائر.' }),
+      h('div', { class: 'row2' }, field('نص الزر', c, 'buttonText'), field('رابط الزر', c, 'url', { ph: 'https://' })),
+      field('إخفاء العداد لما العرض يخلص', c, 'hideWhenEnded', { type: 'checkbox' }),
+      field('رسالة بعد الانتهاء (لو مش هتخفيه)', c, 'endedText')));
+}
+
+function buildLinks(openIdx = -1) {
+  const box = $('#linksBox'); box.innerHTML = '';
+  if (!cfg.links.length) box.append(h('p', { class: 'sub' }, 'مفيش لينكات لسه. ضيف أول لينك من تحت.'));
+  cfg.links.forEach((l, i) => {
+    const isH = l.type === 'heading';
+    const t = h('span', { class: 't' }, l.title || (isH ? 'عنوان قسم' : 'لينك بدون عنوان'));
+    const tag = h('span', { class: 'tag' }, isH ? 'عنوان' : (l.enabled === false ? 'مخفي' : 'لينك'));
+    const upd = () => { tag.textContent = isH ? 'عنوان' : (l.enabled === false ? 'مخفي' : 'لينك'); };
+    const body = h('div', { class: 'body' },
+      h('div', { class: 'ctl' }, ctlBtn('↑', () => move(cfg.links, i, -1, buildLinks)), ctlBtn('↓', () => move(cfg.links, i, 1, buildLinks)),
+        ctlBtn('نسخ', () => { const n = clone(l); n.id = uid(); cfg.links.splice(i + 1, 0, n); buildLinks(i + 1); push(); }),
+        ctlBtn('حذف', () => { if (confirm('تحذف "' + (l.title || 'اللينك') + '"؟')) { cfg.links.splice(i, 1); buildLinks(); push(); } }, 'dng')));
+    if (isH) {
+      body.append(field('نص العنوان', l, 'title', { on: v => { t.textContent = v || 'عنوان قسم'; } }),
+        field('ظاهر', l, 'enabled', { type: 'checkbox', on: upd }));
+    } else {
+      body.append(
+        field('ظاهر على الصفحة', l, 'enabled', { type: 'checkbox', on: upd }),
+        field('عنوان الزر', l, 'title', { on: v => { t.textContent = v || 'لينك بدون عنوان'; } }),
+        field('سطر صغير تحت العنوان (اختياري)', l, 'subtitle'),
+        field('الرابط', l, 'url', { ph: 'https://' }),
+        imageField('صورة الزر (اختياري)', l, 'image', 200, 'image/jpeg'),
+        h('div', { class: 'row2' },
+          field('شارة صغيرة', l, 'badge', { ph: 'جديد / خصم 20%' }),
+          h('div', {}, field('نبض لجذب الانتباه', l, 'highlight', { type: 'checkbox' }))),
+        h('div', { class: 'group' }, h('h3', {}, 'جدولة الظهور (اختياري)'),
+          h('div', { class: 'row2' }, field('يظهر من', l, 'start', { type: 'datetime-local' }), field('يختفي في', l, 'end', { type: 'datetime-local' }))));
+    }
+    const d = h('details', { class: 'item' }, h('summary', {}, t, tag), body);
+    if (i === openIdx) d.open = true;
+    box.append(d);
+  });
+}
+function buildTrack() {
+  const b = $('#trackBox'); b.innerHTML = '';
+  b.append(
+    field('Meta Pixel ID', cfg.pixels, 'meta', { ph: '123456789012345', hint: 'أرقام بس. لو فاضي مش هيتحمل.' }),
+    field('TikTok Pixel ID', cfg.pixels, 'tiktok', { ph: 'C1ABCDEF...', hint: 'الكود اللي بيبدأ بحروف وأرقام من TikTok Events Manager.' }),
+    h('div', { class: 'note' }, 'لو بتعلن على الصفحة دي، اضغط على المعاينة وافتح الصفحة الحقيقية بعد النشر وتأكد من Meta Pixel Helper إن الأحداث بتوصل.'));
+}
+
+function buildAll() {
+  buildBrand(); buildSocials(); buildOffers(); buildLinks(); buildTrack();
+}
+
+/* ---------- أزرار ---------- */
+$('#addSocial').onclick = () => { cfg.socials.push({ type: 'instagram', url: '' }); buildSocials(); push(); };
+$('#addLink').onclick = () => { cfg.links.push({ id: uid(), type: 'link', enabled: true, title: 'لينك جديد', subtitle: '', url: '', image: '', badge: '', highlight: false, start: '', end: '' }); buildLinks(cfg.links.length - 1); push(); };
+$('#addHeading').onclick = () => { cfg.links.push({ id: uid(), type: 'heading', enabled: true, title: 'عنوان قسم' }); buildLinks(cfg.links.length - 1); push(); };
+
+function download() {
+  const txt = JSON.stringify(cfg, null, 2);
+  const a = h('a', { href: URL.createObjectURL(new Blob([txt], { type: 'application/json' })), download: 'config.json' });
+  document.body.append(a); a.click(); a.remove();
+  toast('اتحمّل config.json. ارفعه على الاستضافة');
+}
+$('#btnDownload').onclick = download; $('#btnDownload2').onclick = download;
+$('#btnCopy').onclick = async () => { try { await navigator.clipboard.writeText(JSON.stringify(cfg, null, 2)); toast('اتنسخ'); } catch (e) { toast('النسخ مش متاح، استخدم التحميل'); } };
+$('#fileImport').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { cfg = norm(JSON.parse(await f.text())); buildAll(); push(); toast('تم الاستيراد'); } catch (err) { toast('الملف مش JSON سليم'); }
+  e.target.value = '';
+};
+$('#btnReset').onclick = () => { if (confirm('ترجّع كل الإعدادات للافتراضي؟')) { cfg = norm(DEFAULT); buildAll(); push(); toast('اترجعت للافتراضي'); } };
+async function loadPublished(silent) {
+  try {
+    const r = await fetch('config.json?v=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw 0;
+    cfg = norm(await r.json()); buildAll(); push(); if (!silent) toast('اتحمّلت النسخة المنشورة'); return true;
+  } catch (e) { if (!silent) toast('مفيش config.json منشور لسه'); return false; }
+}
+$('#btnRestore').onclick = () => { if (confirm('ده هيمسح المسودة ويحمّل النسخة المنشورة. متأكد؟')) loadPublished(false); };
+
+/* تبويبات */
+const panels = [...document.querySelectorAll('.panel')];
+const tabs = $('#tabs');
+function showTab(id) {
+  panels.forEach(p => p.classList.toggle('on', p.id === id));
+  [...tabs.children].forEach(b => b.setAttribute('aria-selected', b.dataset.id === id));
+}
+panels.forEach(p => { const b = h('button', { class: 'tab', role: 'tab', 'data-id': p.id, type: 'button' }, p.dataset.title); b.onclick = () => showTab(p.id); tabs.append(b); });
+showTab('p-links');
+
+/* معاينة على الموبايل */
+$('#btnPrev').onclick = () => $('#prev').classList.add('open');
+$('#btnClose').onclick = () => $('#prev').classList.remove('open');
+
+/* تشغيل */
+(async function () {
+  let draft = null;
+  try { draft = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { }
+  if (draft) { cfg = norm(draft); buildAll(); $('#draftState').textContent = 'مسودة محفوظة في المتصفح'; }
+  else { if (!(await loadPublished(true))) { cfg = norm(DEFAULT); buildAll(); } }
+})();
+</script>
+</body>
+</html>

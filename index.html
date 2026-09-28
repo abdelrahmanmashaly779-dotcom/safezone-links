@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2a9d2f" id="themeColor">
+<title>Safe Zone</title>
+<link rel="icon" href="data:," id="favicon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#2a9d2f;--bg2:#238a28;--btn:#ffffff;--btnText:#1f8f26;--text:#ffffff;--r:14px}
+html,body{min-height:100%}
+body{
+  font-family:'Cairo',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
+  background:var(--bg);
+  background-image:linear-gradient(180deg,var(--bg),var(--bg2));
+  background-attachment:fixed;
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+}
+a{color:inherit;text-decoration:none}
+a:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.wrap{
+  max-width:480px;margin:0 auto;
+  padding:max(28px,env(safe-area-inset-top)) 16px max(48px,env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:14px;
+}
+
+/* announcement */
+.ann{
+  display:block;text-align:center;font-weight:700;font-size:14px;line-height:1.6;
+  background:rgba(0,0,0,.24);border-radius:var(--r);padding:10px 14px;
+}
+
+/* header */
+.head{text-align:center;padding:8px 0 4px}
+.logo{
+  width:112px;height:112px;border-radius:50%;background:#fff;object-fit:cover;
+  display:block;margin:0 auto;box-shadow:0 6px 22px rgba(0,0,0,.18);
+}
+.head h1{font-size:27px;font-weight:800;margin-top:14px;letter-spacing:.2px}
+.head p{font-size:16px;font-weight:600;line-height:1.7;margin:6px auto 0;max-width:340px;opacity:.96;white-space:pre-line}
+.socials{display:flex;justify-content:center;flex-wrap:wrap;gap:22px;margin-top:18px}
+.socials a{display:block;width:30px;height:30px;transition:transform .15s}
+.socials a:hover{transform:scale(1.12)}
+.socials svg{width:100%;height:100%;display:block}
+
+/* countdown */
+.cd{
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);
+  border-radius:20px;padding:16px;text-align:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.cd h2{font-size:17px;font-weight:800;margin-bottom:12px}
+.units{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.u{background:rgba(0,0,0,.22);border-radius:12px;padding:9px 0 7px}
+.u b{display:block;font-size:26px;font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums}
+.u small{font-size:12px;font-weight:600;opacity:.92}
+.cd .go{
+  display:block;margin-top:12px;background:var(--btn);color:var(--btnText);
+  border-radius:var(--r);padding:11px;font-weight:800;
+}
+.cd .ended{font-weight:700;padding:6px 0}
+
+/* section heading */
+.hd{font-weight:800;font-size:15px;text-align:center;opacity:.95;margin-top:8px}
+
+/* link cards */
+.links{display:flex;flex-direction:column;gap:12px}
+.card{
+  position:relative;direction:ltr;
+  display:grid;grid-template-columns:56px 1fr 24px;align-items:center;gap:10px;
+  background:var(--btn);color:var(--btnText);
+  border-radius:var(--r);padding:10px;min-height:68px;
+  box-shadow:0 4px 14px rgba(0,0,0,.14);transition:transform .15s,box-shadow .15s;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.card:active{transform:scale(.985)}
+.thumb{width:56px;height:56px;border-radius:calc(var(--r) - 4px);object-fit:cover;display:block}
+.thumb.ph{background:transparent}
+.ctext{direction:rtl;text-align:center;display:flex;flex-direction:column;gap:2px;padding:0 2px}
+.ctext b{font-size:16px;font-weight:800;line-height:1.45}
+.ctext small{font-size:13px;font-weight:600;opacity:.75;line-height:1.4}
+.arrow{width:20px;height:20px;opacity:.45}
+.arrow svg{width:100%;height:100%;display:block}
+.badge{
+  position:absolute;top:-9px;inset-inline-start:14px;direction:rtl;
+  background:#e5322d;color:#fff;font-style:normal;font-weight:800;font-size:12px;
+  padding:2px 10px;border-radius:99px;box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.pulse{animation:pulse 1.9s ease-out infinite}
+@keyframes pulse{
+  0%{box-shadow:0 4px 14px rgba(0,0,0,.14),0 0 0 0 rgba(255,255,255,.65)}
+  100%{box-shadow:0 4px 14px rgba(0,0,0,.14),0 0 0 16px rgba(255,255,255,0)}
+}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}.card,.socials a{transition:none}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+
+<script>
+/* ---------- الإعدادات الافتراضية (لو مفيش config.json) ---------- */
+const DEFAULT_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="100" fill="#fff"/>' +
+  '<circle cx="100" cy="100" r="82" fill="none" stroke="#2a9d2f" stroke-width="3"/>' +
+  '<text x="100" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="40" fill="#1fa84a">Safe</text>' +
+  '<text x="100" y="140" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="40" fill="#1fa84a">Zone</text></svg>');
+
+const DEFAULT = {
+  brand: { name: 'Safezonestore', tagline: 'المنتجات المعلن عنها موجودة\nهنا... في السيف زوون', logo: DEFAULT_LOGO },
+  theme: { bg: '#2a9d2f', bg2: '#238a28', btn: '#ffffff', btnText: '#1f8f26', text: '#ffffff', radius: '14' },
+  socials: [
+    { type: 'tiktok', url: 'https://www.tiktok.com/@' },
+    { type: 'instagram', url: 'https://www.instagram.com/' },
+    { type: 'whatsapp', url: 'https://wa.me/' },
+    { type: 'facebook', url: 'https://www.facebook.com/' }
+  ],
+  announcement: { enabled: false, text: '🔥 خصم خاص لفترة محدودة على كل المنتجات', url: '' },
+  countdown: { enabled: false, title: 'العرض بينتهي خلال', end: '', buttonText: 'اطلب دلوقتي', url: 'https://safe-zone.store', hideWhenEnded: true, endedText: 'العرض انتهى' },
+  links: [
+    { id: 'a1', type: 'link', enabled: true, title: 'للطلب من مصر (متجرنا سيف زوون)', subtitle: '', url: 'https://safe-zone.store', image: DEFAULT_LOGO, badge: '', highlight: false, start: '', end: '' },
+    { id: 'a2', type: 'link', enabled: true, title: 'لطلب أرجيفيت فوكس خارج مصر (دول الخليج وغيرها)', subtitle: '', url: '', image: '', badge: '', highlight: false, start: '', end: '' }
+  ],
+  pixels: { meta: '', tiktok: '' }
+};
+
+function norm(c) {
+  c = c || {};
+  const d = JSON.parse(JSON.stringify(DEFAULT));
+  return {
+    brand: { ...d.brand, ...c.brand }, theme: { ...d.theme, ...c.theme },
+    announcement: { ...d.announcement, ...c.announcement }, countdown: { ...d.countdown, ...c.countdown },
+    pixels: { ...d.pixels, ...c.pixels },
+    socials: Array.isArray(c.socials) ? c.socials : d.socials,
+    links: Array.isArray(c.links) ? c.links : d.links
+  };
+}
+
+/* ---------- أيقونات ---------- */
+const S = (inner, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${inner}</svg>`;
+const PHONE = 'M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z';
+const ICON = {
+  tiktok: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>',
+  instagram: S('<rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>'),
+  whatsapp: S(`<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><g transform="translate(6.6 6.4) scale(.46)"><path stroke-width="3.6" d="${PHONE}"/></g>`),
+  facebook: S('<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>'),
+  youtube: S('<path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>'),
+  telegram: S('<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>'),
+  web: S('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'),
+  mail: S('<path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/>'),
+  phone: S(`<path d="${PHONE}"/>`),
+  arrow: S('<polyline points="15 18 9 12 15 6"/>')
+};
+
+/* ---------- أدوات ---------- */
+function safeUrl(u) {
+  u = (u || '').trim();
+  if (!u) return '#';
+  if (/^(https?:\/\/|tel:|mailto:)/i.test(u)) return u;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return '#';
+  return 'https://' + u;
+}
+function safeImg(s) { return /^(data:image\/|https?:\/\/|[\w\-./]+$)/i.test(s || '') ? s : ''; }
+function h(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v; else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()) { if (k == null || k === false) continue; e.append(k.nodeType ? k : document.createTextNode(k)); }
+  return e;
+}
+const params = new URLSearchParams(location.search);
+const PREVIEW = params.has('preview');
+
+/* ---------- البيكسل ---------- */
+let pixelsDone = false;
+function loadPixels(p) {
+  if (pixelsDone || PREVIEW) return;
+  pixelsDone = true;
+  const meta = (p.meta || '').replace(/\D/g, '');
+  const tt = (p.tiktok || '').replace(/[^A-Za-z0-9]/g, '');
+  if (meta) {
+    !function (f, b, e, v, n, t, s) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments) }; if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s) }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', meta); fbq('track', 'PageView');
+  }
+  if (tt) {
+    !function (w, d, t) { w.TiktokAnalyticsObject = t; var ttq = w[t] = w[t] || []; ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie"], ttq.setAndDefer = function (t, e) { t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } }; for (var i = 0; i < ttq.methods.length; i++)ttq.setAndDefer(ttq, ttq.methods[i]); ttq.instance = function (t) { for (var e = ttq._i[t] || [], n = 0; n < ttq.methods.length; n++)ttq.setAndDefer(e, ttq.methods[n]); return e }, ttq.load = function (e, n) { var i = "https://analytics.tiktok.com/i18n/pixel/events.js"; ttq._i = ttq._i || {}, ttq._i[e] = [], ttq._i[e]._u = i, ttq._t = ttq._t || {}, ttq._t[e] = +new Date, ttq._o = ttq._o || {}, ttq._o[e] = n || {}; var o = document.createElement("script"); o.type = "text/javascript", o.async = !0, o.src = i + "?sdkid=" + e + "&lib=" + t; var a = document.getElementsByTagName("script")[0]; a.parentNode.insertBefore(o, a) }; ttq.load(tt); ttq.page() }(window, document, 'ttq');
+  }
+}
+function track(label) {
+  if (PREVIEW) return;
+  try { if (window.fbq) fbq('trackCustom', 'LinkClick', { label }); } catch (e) { }
+  try { if (window.ttq) ttq.track('ClickButton', { content_name: label }); } catch (e) { }
+}
+
+/* ---------- الرسم ---------- */
+let timer = null;
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function renderCountdown(c) {
+  if (!c.enabled || !c.end) return null;
+  const end = new Date(c.end).getTime();
+  if (isNaN(end)) return null;
+  if (end <= Date.now() && c.hideWhenEnded) return null;
+
+  const nums = {}, units = h('div', { class: 'units' });
+  [['d', 'يوم'], ['h', 'ساعة'], ['m', 'دقيقة'], ['s', 'ثانية']].forEach(([k, label]) => {
+    nums[k] = h('b', {}, '00');
+    units.append(h('div', { class: 'u' }, nums[k], h('small', {}, label)));
+  });
+  const box = h('section', { class: 'cd' },
+    c.title ? h('h2', {}, c.title) : null, units,
+    c.buttonText ? h('a', { class: 'go', href: safeUrl(c.url), target: '_blank', rel: 'noopener noreferrer', 'data-t': c.buttonText }, c.buttonText) : null);
+  const go = box.querySelector('.go'); if (go) go.addEventListener('click', () => track('countdown'));
+
+  const tick = () => {
+    let left = Math.max(0, end - Date.now());
+    if (left === 0) {
+      clearInterval(timer);
+      if (c.hideWhenEnded) box.remove(); else { units.replaceWith(h('div', { class: 'ended' }, c.endedText || 'العرض انتهى')); if (go) go.remove(); }
+      return;
+    }
+    const s = Math.floor(left / 1000);
+    nums.d.textContent = pad(Math.floor(s / 86400));
+    nums.h.textContent = pad(Math.floor(s % 86400 / 3600));
+    nums.m.textContent = pad(Math.floor(s % 3600 / 60));
+    nums.s.textContent = pad(s % 60);
+  };
+  tick(); timer = setInterval(tick, 1000);
+  return box;
+}
+
+function visible(l) {
+  if (l.enabled === false) return false;
+  const now = Date.now();
+  if (l.start) { const t = new Date(l.start).getTime(); if (!isNaN(t) && now < t) return false; }
+  if (l.end) { const t = new Date(l.end).getTime(); if (!isNaN(t) && now > t) return false; }
+  return true;
+}
+
+function render(cfg) {
+  clearInterval(timer);
+  const c = norm(cfg);
+  const st = document.documentElement.style;
+  st.setProperty('--bg', c.theme.bg); st.setProperty('--bg2', c.theme.bg2);
+  st.setProperty('--btn', c.theme.btn); st.setProperty('--btnText', c.theme.btnText);
+  st.setProperty('--text', c.theme.text); st.setProperty('--r', (parseInt(c.theme.radius, 10) || 14) + 'px');
+  document.getElementById('themeColor').setAttribute('content', c.theme.bg);
+  document.title = c.brand.name || 'Safe Zone';
+  const logo = safeImg(c.brand.logo);
+  if (logo) document.getElementById('favicon').setAttribute('href', logo);
+
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  if (c.announcement.enabled && c.announcement.text) {
+    const a = c.announcement;
+    const el = a.url ? h('a', { class: 'ann', href: safeUrl(a.url), target: '_blank', rel: 'noopener noreferrer' }, a.text) : h('div', { class: 'ann' }, a.text);
+    if (a.url) el.addEventListener('click', () => track('announcement'));
+    app.append(el);
+  }
+
+  const socials = c.socials.filter(s => s && s.url && ICON[s.type]);
+  app.append(h('header', { class: 'head' },
+    logo ? h('img', { class: 'logo', src: logo, alt: c.brand.name || '' }) : null,
+    c.brand.name ? h('h1', {}, c.brand.name) : null,
+    c.brand.tagline ? h('p', {}, c.brand.tagline) : null,
+    socials.length ? h('nav', { class: 'socials', 'aria-label': 'social' },
+      socials.map(s => {
+        const a = h('a', { href: safeUrl(s.url), target: '_blank', rel: 'noopener noreferrer', 'aria-label': s.type, html: ICON[s.type] });
+        a.addEventListener('click', () => track('social_' + s.type));
+        return a;
+      })) : null));
+
+  const cd = renderCountdown(c.countdown);
+  if (cd) app.append(cd);
+
+  const list = h('div', { class: 'links' });
+  c.links.filter(visible).forEach(l => {
+    if (l.type === 'heading') { if (l.title) list.append(h('div', { class: 'hd' }, l.title)); return; }
+    const img = safeImg(l.image);
+    const card = h('a', { class: 'card' + (l.highlight ? ' pulse' : ''), href: safeUrl(l.url), target: '_blank', rel: 'noopener noreferrer' },
+      img ? h('img', { class: 'thumb', src: img, alt: '', loading: 'lazy' }) : h('span', { class: 'thumb ph' }),
+      h('span', { class: 'ctext' }, h('b', {}, l.title || ''), l.subtitle ? h('small', {}, l.subtitle) : null),
+      h('span', { class: 'arrow', html: ICON.arrow }),
+      l.badge ? h('em', { class: 'badge' }, l.badge) : null);
+    card.addEventListener('click', () => track(l.title || 'link'));
+    list.append(card);
+  });
+  app.append(list);
+
+  loadPixels(c.pixels);
+}
+
+/* ---------- التشغيل ---------- */
+async function boot() {
+  if (PREVIEW) {
+    window.addEventListener('message', e => { if (e.data && e.data.type === 'sz-config') render(e.data.config); });
+    render(DEFAULT);
+    parent.postMessage({ type: 'sz-ready' }, '*');
+    return;
+  }
+  let cfg = DEFAULT;
+  try {
+    const r = await fetch('config.json?v=' + Date.now(), { cache: 'no-store' });
+    if (r.ok) cfg = await r.json();
+  } catch (e) { /* يفضل على الإعدادات الافتراضية */ }
+  render(cfg);
+}
+boot();
+</script>
+</body>
+</html>

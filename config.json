@@ -1,0 +1,79 @@
+{
+  "brand": {
+    "name": "Safezonestore",
+    "tagline": "المنتجات المعلن عنها موجودة\nهنا... في السيف زوون",
+    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22100%22%20r%3D%22100%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22100%22%20r%3D%2282%22%20fill%3D%22none%22%20stroke%3D%22%232a9d2f%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%22100%22%20y%3D%2298%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2Csans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2240%22%20fill%3D%22%231fa84a%22%3ESafe%3C%2Ftext%3E%3Ctext%20x%3D%22100%22%20y%3D%22140%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2Csans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2240%22%20fill%3D%22%231fa84a%22%3EZone%3C%2Ftext%3E%3C%2Fsvg%3E"
+  },
+  "theme": {
+    "bg": "#2a9d2f",
+    "bg2": "#238a28",
+    "btn": "#ffffff",
+    "btnText": "#1f8f26",
+    "text": "#ffffff",
+    "radius": "14"
+  },
+  "socials": [
+    {
+      "type": "tiktok",
+      "url": "https://www.tiktok.com/@"
+    },
+    {
+      "type": "instagram",
+      "url": "https://www.instagram.com/"
+    },
+    {
+      "type": "whatsapp",
+      "url": "https://wa.me/"
+    },
+    {
+      "type": "facebook",
+      "url": "https://www.facebook.com/"
+    }
+  ],
+  "announcement": {
+    "enabled": false,
+    "text": "🔥 خصم خاص لفترة محدودة على كل المنتجات",
+    "url": ""
+  },
+  "countdown": {
+    "enabled": false,
+    "title": "العرض بينتهي خلال",
+    "end": "",
+    "buttonText": "اطلب دلوقتي",
+    "url": "https://safe-zone.store",
+    "hideWhenEnded": true,
+    "endedText": "العرض انتهى"
+  },
+  "links": [
+    {
+      "id": "a1",
+      "type": "link",
+      "enabled": true,
+      "title": "للطلب من مصر (متجرنا سيف زوون)",
+      "subtitle": "",
+      "url": "https://safe-zone.store",
+      "image": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22100%22%20r%3D%22100%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22100%22%20r%3D%2282%22%20fill%3D%22none%22%20stroke%3D%22%232a9d2f%22%20stroke-width%3D%223%22%2F%3E%3Ctext%20x%3D%22100%22%20y%3D%2298%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2Csans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2240%22%20fill%3D%22%231fa84a%22%3ESafe%3C%2Ftext%3E%3Ctext%20x%3D%22100%22%20y%3D%22140%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2Csans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2240%22%20fill%3D%22%231fa84a%22%3EZone%3C%2Ftext%3E%3C%2Fsvg%3E",
+      "badge": "",
+      "highlight": false,
+      "start": "",
+      "end": ""
+    },
+    {
+      "id": "a2",
+      "type": "link",
+      "enabled": true,
+      "title": "لطلب أرجيفيت فوكس خارج مصر (دول الخليج وغيرها)",
+      "subtitle": "",
+      "url": "",
+      "image": "",
+      "badge": "",
+      "highlight": false,
+      "start": "",
+      "end": ""
+    }
+  ],
+  "pixels": {
+    "meta": "",
+    "tiktok": ""
+  }
+}
