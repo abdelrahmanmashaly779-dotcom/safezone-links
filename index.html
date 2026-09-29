@@ -96,7 +96,7 @@ a:focus-visible{outline:3px solid #fff;outline-offset:3px}
 }
 @media (prefers-reduced-motion:reduce){.card,.socials a{transition:none}*,*::before,*::after{animation:none!important}}
 
-/* ===== FX: خلفية / أزرار / حركة (بتتحكم فيها لوحة الأدمن) ===== */
+/* ===== FX ===== */
 :root{--th:56px;--mh:68px;--fs:16px;--gap:12px;--bw:0px;--bc:#fff;--shc:#000;--sh:0 4px 14px rgba(0,0,0,.14);--spd:1;--an-en:none;--an-ba:none}
 body{position:relative;isolation:isolate}
 #bg{position:absolute;inset:0;overflow:hidden;z-index:-1;pointer-events:none}
@@ -150,7 +150,6 @@ body[data-en=zoom] :is(.wrap>*:not(.links),.links>*){--an-en:e-zoom calc(.6s/var
 <main class="wrap" id="app"></main>
 
 <script>
-/* ---------- الإعدادات الافتراضية (لو مفيش config.json) ---------- */
 const DEFAULT_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="100" fill="#fff"/>' +
   '<circle cx="100" cy="100" r="82" fill="none" stroke="#2a9d2f" stroke-width="3"/>' +
@@ -377,7 +376,17 @@ function render(cfg) {
       h('span', { class: 'ctext' }, h('b', {}, l.title || ''), l.subtitle ? h('small', {}, l.subtitle) : null),
       h('span', { class: 'arrow', html: ICON.arrow }),
       l.badge ? h('em', { class: 'badge' }, l.badge) : null);
-    card.addEventListener('click', () => track(l.title || 'link'));
+
+    // تسجيل الضغطة الفريدة عند النقر (بدون تكرار)
+    card.addEventListener('click', () => {
+      track(l.title || 'link');
+      const clickKey = 'sz_click_' + l.id;
+      if (!localStorage.getItem(clickKey)) {
+        localStorage.setItem(clickKey, '1');
+        fetch(`https://api.counterapi.dev/v1/safezone_store_${l.id}/clicks/up`).catch(() => {});
+      }
+    });
+
     list.append(card);
   });
   app.append(list);
