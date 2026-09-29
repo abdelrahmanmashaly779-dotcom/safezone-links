@@ -182,7 +182,10 @@ const DEFAULT_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   '<text x="100" y="140" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="40" fill="#1fa84a">Zone</text></svg>');
 const DEFAULT = {
   brand: { name: 'Safezonestore', tagline: 'المنتجات المعلن عنها موجودة\nهنا... في السيف زوون', logo: DEFAULT_LOGO },
-  theme: { bg: '#2a9d2f', bg2: '#238a28', btn: '#ffffff', btnText: '#1f8f26', text: '#ffffff', radius: '14' },
+  theme: { bg: '#2a9d2f', bg2: '#238a28', btn: '#ffffff', btnText: '#1f8f26', text: '#ffffff', radius: '14',
+    bgImage: '', bgSize: 'cover', bgPos: 'center', bgFixed: false, bgOverlay: '#000000', bgOverlayOp: '30', bgBlur: '0', bgAnim: 'none',
+    btnStyle: 'solid', btnShadow: 'none', btnShadowColor: '#000000', btnBorderW: '0', btnBorderC: '#ffffff', btnSize: 'md', btnGap: '12',
+    btnAnim: 'none', btnHover: 'none', entrance: 'none', logoAnim: 'none', animSpeed: '1' },
   socials: [
     { type: 'tiktok', url: 'https://www.tiktok.com/@' },
     { type: 'instagram', url: 'https://www.instagram.com/' },
@@ -245,7 +248,7 @@ function field(label, obj, key, o = {}) {
   let i;
   if (type === 'textarea') i = h('textarea', { rows: 2 });
   else if (type === 'select') i = h('select', {}, o.options.map(([v, t]) => h('option', { value: v }, t)));
-  else i = h('input', { type });
+  else i = h('input', { type, min: o.min, max: o.max, step: o.step });
   if (o.ph) i.placeholder = o.ph;
   i.value = obj[key] ?? '';
   const upd = () => { obj[key] = i.value; push(); o.on && o.on(i.value); };
@@ -298,6 +301,37 @@ function buildBrand() {
         field('لون الكتابة', cfg.theme, 'text', { type: 'color' })),
       h('div', { style: 'margin-top:12px' }, field('شكل الأزرار', cfg.theme, 'radius', { type: 'select', options: [['14', 'مدوّر'], ['999', 'كبسولة'], ['6', 'حواف خفيفة']] })),
       h('small', { style: 'color:var(--mut)' }, 'لو خلّيت لون الخلفية فوق وتحت زي بعض هتاخد لون واحد ثابت.')));
+  const T = cfg.theme;
+  const S = (l, k, opts, hint) => field(l, T, k, { type: 'select', options: opts, hint });
+  const R = (l, k, min, max, step, hint) => field(l, T, k, { type: 'range', min, max, step, hint });
+  const C = (l, k) => field(l, T, k, { type: 'color' });
+  b.append(
+    h('div', { class: 'group' }, h('h3', {}, 'خلفية بصورة'),
+      imageField('صورة الخلفية (لو فاضية بيتستخدم اللون)', T, 'bgImage', 1080, 'image/jpeg'),
+      h('div', { class: 'row2' },
+        S('حجم الصورة', 'bgSize', [['cover', 'تغطية كاملة'], ['contain', 'احتواء'], ['repeat', 'تكرار (نمط)']]),
+        S('موضع الصورة', 'bgPos', [['center', 'وسط'], ['top', 'أعلى'], ['bottom', 'أسفل']])),
+      field('تثبيت الخلفية أثناء التمرير', T, 'bgFixed', { type: 'checkbox' }),
+      h('div', { class: 'colors' }, C('لون الطبقة فوق الصورة', 'bgOverlay')),
+      R('قوة الطبقة % (لتوضيح الكتابة)', 'bgOverlayOp', 0, 90, 5),
+      R('تغبيش الصورة (px)', 'bgBlur', 0, 20, 1),
+      S('حركة الخلفية', 'bgAnim', [['none', 'بدون'], ['kenburns', 'زوم بطيء (للصور)'], ['gradient', 'تدرج متحرك (للألوان)']])),
+    h('div', { class: 'group' }, h('h3', {}, 'شكل الأزرار'),
+      S('النمط', 'btnStyle', [['solid', 'ممتلئ'], ['outline', 'إطار فقط'], ['glass', 'زجاجي شفاف'], ['gradient', 'تدرج'], ['soft', 'ناعم']]),
+      h('div', { class: 'row2' },
+        S('الحجم', 'btnSize', [['sm', 'صغير'], ['md', 'عادي'], ['lg', 'كبير']]),
+        S('الظل', 'btnShadow', [['none', 'بدون'], ['soft', 'خفيف'], ['medium', 'متوسط'], ['strong', 'قوي'], ['glow', 'توهج'], ['hard', 'ظل صلب (Neo)']])),
+      h('div', { class: 'colors' }, C('لون الظل', 'btnShadowColor'), C('لون الإطار', 'btnBorderC')),
+      R('سمك الإطار (px)', 'btnBorderW', 0, 6, 1),
+      R('المسافة بين الأزرار (px)', 'btnGap', 6, 28, 2)),
+    h('div', { class: 'group' }, h('h3', {}, 'الحركة والأنيميشن'),
+      h('div', { class: 'row2' },
+        S('حركة الأزرار الدائمة', 'btnAnim', [['none', 'بدون'], ['pulse', 'نبض'], ['float', 'طفو'], ['shake', 'اهتزاز كل فترة'], ['glow', 'توهج متكرر'], ['shine', 'لمعة تعدّي']]),
+        S('عند اللمس / المرور', 'btnHover', [['none', 'بدون'], ['lift', 'ارتفاع'], ['grow', 'تكبير'], ['glow', 'توهج']])),
+      h('div', { class: 'row2' },
+        S('ظهور العناصر عند الفتح', 'entrance', [['none', 'بدون'], ['fade', 'تلاشي'], ['fade-up', 'صعود + تلاشي'], ['zoom', 'تكبير']]),
+        S('حركة اللوجو', 'logoAnim', [['none', 'بدون'], ['float', 'طفو'], ['pulse', 'نبض']])),
+      R('سرعة الحركة (1 = عادي)', 'animSpeed', 0.5, 2, 0.1, 'أقل من 1 أبطأ، وأكتر من 1 أسرع.')));
 }
 
 function buildSocials() {
