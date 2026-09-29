@@ -20,7 +20,7 @@
     "bgBlur": "0",
     "bgAnim": "none",
     "btnStyle": "glass",
-    "btnShadow": "hard",
+    "btnShadow": "medium",
     "btnShadowColor": "#9ab1a0",
     "btnBorderW": "0",
     "btnBorderC": "#ffffff",
@@ -34,7 +34,7 @@
   },
   "announcement": {
     "enabled": false,
-    "text": "🔥 خصم خاص لفترة محدودة على كل المنتجات",
+    "text": "خصومات بمناسبة رجوع الدراسة ",
     "url": ""
   },
   "countdown": {
