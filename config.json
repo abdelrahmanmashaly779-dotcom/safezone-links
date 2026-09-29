@@ -18,7 +18,7 @@
     "bgOverlay": "#000000",
     "bgOverlayOp": "10",
     "bgBlur": "0",
-    "bgAnim": "none",
+    "bgAnim": "kenburns",
     "btnStyle": "glass",
     "btnShadow": "none",
     "btnShadowColor": "#285c35",
