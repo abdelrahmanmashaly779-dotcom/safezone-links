@@ -374,6 +374,16 @@ function buildLinks(openIdx = -1) {
     const t = h('span', { class: 't' }, l.title || (isH ? 'عنوان قسم' : 'لينك بدون عنوان'));
     const tag = h('span', { class: 'tag' }, isH ? 'عنوان' : (l.enabled === false ? 'مخفي' : 'لينك'));
     const upd = () => { tag.textContent = isH ? 'عنوان' : (l.enabled === false ? 'مخفي' : 'لينك'); };
+
+    // شارة لعرض العداد لكل لينك
+    const countTag = h('span', { class: 'tag', style: 'background:#e3f2fd; color:#0d47a1; margin-inline-start:6px' }, '📊 ...');
+    if (!isH) {
+      fetch(`https://api.counterapi.dev/v1/safezone_store_${l.id}/clicks`)
+        .then(res => res.json())
+        .then(data => { countTag.textContent = '📊 ' + (data.count || 0) + ' ضغطة'; })
+        .catch(() => { countTag.textContent = '📊 0 ضغطة'; });
+    }
+
     const body = h('div', { class: 'body' },
       h('div', { class: 'ctl' }, ctlBtn('↑', () => move(cfg.links, i, -1, buildLinks)), ctlBtn('↓', () => move(cfg.links, i, 1, buildLinks)),
         ctlBtn('نسخ', () => { const n = clone(l); n.id = uid(); cfg.links.splice(i + 1, 0, n); buildLinks(i + 1); push(); }),
@@ -394,7 +404,7 @@ function buildLinks(openIdx = -1) {
         h('div', { class: 'group' }, h('h3', {}, 'جدولة الظهور (اختياري)'),
           h('div', { class: 'row2' }, field('يظهر من', l, 'start', { type: 'datetime-local' }), field('يختفي في', l, 'end', { type: 'datetime-local' }))));
     }
-    const d = h('details', { class: 'item' }, h('summary', {}, t, tag), body);
+    const d = h('details', { class: 'item' }, h('summary', {}, t, tag, !isH ? countTag : null), body);
     if (i === openIdx) d.open = true;
     box.append(d);
   });
