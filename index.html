@@ -69,20 +69,18 @@ a:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .hd{font-weight:800;font-size:15px;text-align:center;opacity:.95;margin-top:8px}
 
 /* link cards */
-.links{display:flex;flex-direction:column;gap:12px}
+.links{display:flex;flex-direction:column;gap:var(--gap,12px)}
 .card{
   position:relative;direction:ltr;
-  display:grid;grid-template-columns:56px 1fr 24px;align-items:center;gap:10px;
+  display:grid;grid-template-columns:var(--th,56px) 1fr 24px;align-items:center;gap:10px;
   background:var(--btn);color:var(--btnText);
-  border-radius:var(--r);padding:10px;min-height:68px;
-  box-shadow:0 4px 14px rgba(0,0,0,.14);transition:transform .15s,box-shadow .15s;
+  border-radius:var(--r);padding:10px;min-height:var(--mh,68px);
+  transition:transform .15s,box-shadow .15s;
 }
-.card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2)}
-.card:active{transform:scale(.985)}
-.thumb{width:56px;height:56px;border-radius:calc(var(--r) - 4px);object-fit:cover;display:block}
+.thumb{width:var(--th,56px);height:var(--th,56px);border-radius:calc(var(--r) - 4px);object-fit:cover;display:block}
 .thumb.ph{background:transparent}
 .ctext{direction:rtl;text-align:center;display:flex;flex-direction:column;gap:2px;padding:0 2px}
-.ctext b{font-size:16px;font-weight:800;line-height:1.45}
+.ctext b{font-size:var(--fs,16px);font-weight:800;line-height:1.45}
 .ctext small{font-size:13px;font-weight:600;opacity:.75;line-height:1.4}
 .arrow{width:20px;height:20px;opacity:.45}
 .arrow svg{width:100%;height:100%;display:block}
@@ -91,12 +89,61 @@ a:focus-visible{outline:3px solid #fff;outline-offset:3px}
   background:#e5322d;color:#fff;font-style:normal;font-weight:800;font-size:12px;
   padding:2px 10px;border-radius:99px;box-shadow:0 2px 6px rgba(0,0,0,.25);
 }
-.pulse{animation:pulse 1.9s ease-out infinite}
+.pulse{--an-ba:pulse calc(1.9s/var(--spd)) ease-out infinite}
 @keyframes pulse{
-  0%{box-shadow:0 4px 14px rgba(0,0,0,.14),0 0 0 0 rgba(255,255,255,.65)}
-  100%{box-shadow:0 4px 14px rgba(0,0,0,.14),0 0 0 16px rgba(255,255,255,0)}
+  0%{box-shadow:var(--sh),0 0 0 0 rgba(255,255,255,.65)}
+  100%{box-shadow:var(--sh),0 0 0 16px rgba(255,255,255,0)}
 }
-@media (prefers-reduced-motion:reduce){.pulse{animation:none}.card,.socials a{transition:none}}
+@media (prefers-reduced-motion:reduce){.card,.socials a{transition:none}*,*::before,*::after{animation:none!important}}
+
+/* ===== FX: خلفية / أزرار / حركة (بتتحكم فيها لوحة الأدمن) ===== */
+:root{--th:56px;--mh:68px;--fs:16px;--gap:12px;--bw:0px;--bc:#fff;--shc:#000;--sh:0 4px 14px rgba(0,0,0,.14);--spd:1;--an-en:none;--an-ba:none}
+body{position:relative;isolation:isolate}
+#bg{position:absolute;inset:0;overflow:hidden;z-index:-1;pointer-events:none}
+#bg.fx{position:fixed}
+#bg .bgl,#bg .bgo{position:absolute;inset:0}
+#bg .bgl{background-repeat:no-repeat}
+body[data-bga=kenburns] #bg .bgl{animation:kb calc(20s/var(--spd)) ease-in-out infinite alternate}
+body[data-bga=gradient]{background-image:linear-gradient(135deg,var(--bg),var(--bg2),var(--bg));background-size:300% 300%;background-attachment:scroll;animation:gm calc(12s/var(--spd)) ease-in-out infinite}
+@keyframes kb{to{transform:scale(1.14)}}
+@keyframes gm{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+
+.card,.cd .go{border:var(--bw) solid var(--bc);box-shadow:var(--sh)}
+body[data-bs=outline] :is(.card,.cd .go){background:transparent;color:var(--text)}
+body[data-bs=glass] :is(.card,.cd .go){background:color-mix(in srgb,var(--btn) 16%,transparent);color:var(--text);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+body[data-bs=soft] :is(.card,.cd .go){background:color-mix(in srgb,var(--btn) 28%,transparent);color:var(--text)}
+body[data-bs=gradient] :is(.card,.cd .go){background:linear-gradient(135deg,var(--btn),color-mix(in srgb,var(--btn) 78%,var(--btnText)))}
+
+body[data-bh=lift] .card:hover{transform:translateY(-3px)}
+body[data-bh=grow] .card:hover{transform:scale(1.035)}
+body[data-bh=glow] .card:hover{box-shadow:var(--sh),0 0 22px 3px color-mix(in srgb,var(--btn) 65%,transparent)}
+body[data-bh] .card:active{transform:scale(.985)}
+
+.card{animation:var(--an-en),var(--an-ba)}
+.wrap>*{animation:var(--an-en)}
+.links{animation:none}
+.links>.hd{animation:var(--an-en)}
+body[data-ba=pulse] .card{--an-ba:bpulse calc(2s/var(--spd)) ease-in-out infinite}
+body[data-ba=float] .card{--an-ba:bfloat calc(3s/var(--spd)) ease-in-out infinite}
+body[data-ba=shake] .card{--an-ba:bshake calc(3.2s/var(--spd)) ease-in-out infinite}
+body[data-ba=glow] .card{--an-ba:bglow calc(2.2s/var(--spd)) ease-in-out infinite}
+body[data-ba] .card.pulse{--an-ba:pulse calc(1.9s/var(--spd)) ease-out infinite}
+body[data-ba=shine] .card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(110deg,transparent 38%,color-mix(in srgb,var(--btnText) 16%,transparent) 50%,transparent 62%);background-size:260% 100%;background-position:160% 0;animation:bshine calc(3s/var(--spd)) ease-in-out infinite}
+@keyframes bpulse{50%{scale:1.035}}
+@keyframes bfloat{50%{translate:0 -5px}}
+@keyframes bshake{0%,70%,100%{rotate:0deg}74%,82%{rotate:-2deg}78%,86%{rotate:2deg}90%{rotate:0deg}}
+@keyframes bglow{50%{box-shadow:var(--sh),0 0 22px 4px color-mix(in srgb,var(--btn) 70%,transparent)}}
+@keyframes bshine{0%{background-position:160% 0}60%,100%{background-position:-60% 0}}
+body[data-lg=float] .logo{animation:bfloat calc(3.4s/var(--spd)) ease-in-out infinite}
+body[data-lg=pulse] .logo{animation:lpulse calc(2.4s/var(--spd)) ease-in-out infinite}
+@keyframes lpulse{50%{scale:1.06}}
+
+body[data-en=fade] :is(.wrap>*:not(.links),.links>*){--an-en:e-fade calc(.6s/var(--spd)) ease calc(var(--i,0)*.08s/var(--spd)) backwards}
+body[data-en=fade-up] :is(.wrap>*:not(.links),.links>*){--an-en:e-up calc(.6s/var(--spd)) ease calc(var(--i,0)*.08s/var(--spd)) backwards}
+body[data-en=zoom] :is(.wrap>*:not(.links),.links>*){--an-en:e-zoom calc(.6s/var(--spd)) ease calc(var(--i,0)*.08s/var(--spd)) backwards}
+@keyframes e-fade{from{opacity:0}}
+@keyframes e-up{from{opacity:0;transform:translateY(20px)}}
+@keyframes e-zoom{from{opacity:0;transform:scale(.88)}}
 </style>
 </head>
 <body>
@@ -112,7 +159,10 @@ const DEFAULT_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
 
 const DEFAULT = {
   brand: { name: 'Safezonestore', tagline: 'المنتجات المعلن عنها موجودة\nهنا... في السيف زوون', logo: DEFAULT_LOGO },
-  theme: { bg: '#2a9d2f', bg2: '#238a28', btn: '#ffffff', btnText: '#1f8f26', text: '#ffffff', radius: '14' },
+  theme: { bg: '#2a9d2f', bg2: '#238a28', btn: '#ffffff', btnText: '#1f8f26', text: '#ffffff', radius: '14',
+    bgImage: '', bgSize: 'cover', bgPos: 'center', bgFixed: false, bgOverlay: '#000000', bgOverlayOp: '30', bgBlur: '0', bgAnim: 'none',
+    btnStyle: 'solid', btnShadow: 'soft', btnShadowColor: '#000000', btnBorderW: '0', btnBorderC: '#ffffff', btnSize: 'md', btnGap: '12',
+    btnAnim: 'none', btnHover: 'lift', entrance: 'none', logoAnim: 'none', animSpeed: '1' },
   socials: [
     { type: 'tiktok', url: 'https://www.tiktok.com/@' },
     { type: 'instagram', url: 'https://www.instagram.com/' },
@@ -243,6 +293,43 @@ function visible(l) {
   return true;
 }
 
+function applyFx(T) {
+  const pick = (v, a, d) => a.includes(v) ? v : d;
+  const num = (v, d, lo, hi) => { const n = parseFloat(v); return isNaN(n) ? d : Math.min(hi, Math.max(lo, n)); };
+  const col = (v, d) => /^#[0-9a-f]{3,8}$/i.test(v || '') ? v : d;
+  const st = document.documentElement.style, ds = document.body.dataset;
+  const bs = pick(T.btnStyle, ['solid', 'outline', 'glass', 'gradient', 'soft'], 'solid');
+  const sz = { sm: [48, 58, 15], md: [56, 68, 16], lg: [68, 84, 18] }[pick(T.btnSize, ['sm', 'md', 'lg'], 'md')];
+  const shc = col(T.btnShadowColor, '#000000'), mix = p => `color-mix(in srgb,${shc} ${p}%,transparent)`;
+  const SH = { none: '0 0 0 0 transparent', soft: `0 4px 14px ${mix(14)}`, medium: `0 8px 22px ${mix(28)}`, strong: `0 14px 34px ${mix(45)}`, glow: `0 0 20px 2px ${mix(75)}`, hard: `4px 4px 0 ${shc}` };
+  let bw = num(T.btnBorderW, 0, 0, 6);
+  if (bs === 'outline') bw = Math.max(bw, 2); if (bs === 'glass') bw = Math.max(bw, 1);
+  st.setProperty('--th', sz[0] + 'px'); st.setProperty('--mh', sz[1] + 'px'); st.setProperty('--fs', sz[2] + 'px');
+  st.setProperty('--gap', num(T.btnGap, 12, 6, 28) + 'px'); st.setProperty('--bw', bw + 'px'); st.setProperty('--bc', col(T.btnBorderC, '#ffffff'));
+  st.setProperty('--shc', shc); st.setProperty('--sh', SH[pick(T.btnShadow, Object.keys(SH), 'soft')]);
+  st.setProperty('--spd', num(T.animSpeed, 1, 0.5, 2));
+  ds.bs = bs; ds.bh = pick(T.btnHover, ['none', 'lift', 'grow', 'glow'], 'lift');
+  ds.ba = pick(T.btnAnim, ['none', 'pulse', 'float', 'shake', 'glow', 'shine'], 'none');
+  ds.en = pick(T.entrance, ['none', 'fade', 'fade-up', 'zoom'], 'none');
+  ds.lg = pick(T.logoAnim, ['none', 'float', 'pulse'], 'none');
+  ds.bga = pick(T.bgAnim, ['none', 'kenburns', 'gradient'], 'none');
+
+  const img = safeImg(T.bgImage);
+  let bg = document.getElementById('bg');
+  if (!bg) { bg = h('div', { id: 'bg' }, h('div', { class: 'bgl' }), h('div', { class: 'bgo' })); document.body.prepend(bg); }
+  bg.style.display = img ? '' : 'none';
+  bg.classList.toggle('fx', !!T.bgFixed);
+  if (!img) return;
+  const l = bg.firstChild, o = bg.lastChild, blur = num(T.bgBlur, 0, 0, 20);
+  const size = pick(T.bgSize, ['cover', 'contain', 'repeat'], 'cover'), pos = pick(T.bgPos, ['center', 'top', 'bottom'], 'center');
+  l.style.backgroundImage = 'url("' + img.replace(/"/g, '%22') + '")';
+  l.style.backgroundSize = size === 'repeat' ? 'auto' : size;
+  l.style.backgroundRepeat = size === 'repeat' ? 'repeat' : 'no-repeat';
+  l.style.backgroundPosition = pos === 'center' ? 'center' : 'center ' + pos;
+  l.style.inset = blur ? '-' + blur * 2 + 'px' : '0'; l.style.filter = blur ? `blur(${blur}px)` : '';
+  o.style.background = col(T.bgOverlay, '#000000'); o.style.opacity = num(T.bgOverlayOp, 30, 0, 90) / 100;
+}
+
 function render(cfg) {
   clearInterval(timer);
   const c = norm(cfg);
@@ -251,6 +338,7 @@ function render(cfg) {
   st.setProperty('--btn', c.theme.btn); st.setProperty('--btnText', c.theme.btnText);
   st.setProperty('--text', c.theme.text); st.setProperty('--r', (parseInt(c.theme.radius, 10) || 14) + 'px');
   document.getElementById('themeColor').setAttribute('content', c.theme.bg);
+  applyFx(c.theme);
   document.title = c.brand.name || 'Safe Zone';
   const logo = safeImg(c.brand.logo);
   if (logo) document.getElementById('favicon').setAttribute('href', logo);
@@ -293,6 +381,8 @@ function render(cfg) {
     list.append(card);
   });
   app.append(list);
+  let n = 0;
+  [...app.children].forEach(el => { if (el === list) [...list.children].forEach(x => x.style.setProperty('--i', n++)); else el.style.setProperty('--i', n++); });
 
   loadPixels(c.pixels);
 }
