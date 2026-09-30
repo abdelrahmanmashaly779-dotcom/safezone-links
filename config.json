@@ -8,7 +8,7 @@
     "bg": "#1b7f3a",
     "bg2": "#0b3d1e",
     "text": "#1b5a26",
-    "font": "custom",
+    "font": "Cairo",
     "bgType": "image",
     "bgAngle": "180",
     "bgAnim": "bubbles",
