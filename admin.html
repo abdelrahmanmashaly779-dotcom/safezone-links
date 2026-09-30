@@ -79,6 +79,30 @@ code{background:#eef3ee;border-radius:6px;padding:1px 6px;font-size:13px;directi
 .prev .cap{text-align:center;color:var(--mut);font-size:12.5px;margin-top:8px}
 .pbtn,.pclose{display:none}
 
+.f input[type=range]{accent-color:var(--g);width:100%}
+.rv{color:var(--g);font-variant-numeric:tabular-nums;margin-inline-start:8px}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.pre{border:1px solid rgba(0,0,0,.12);border-radius:12px;padding:9px 14px;font-weight:800;font-size:13.5px;min-width:96px}
+.pre:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.sc{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fbfdfb}
+.sc b{display:block;font-size:26px;font-weight:800;line-height:1.2}
+.sc small{color:var(--mut);font-size:12.5px}
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:start;color:var(--mut);font-weight:700;font-size:12.5px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.tbl td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl td.n{font-variant-numeric:tabular-nums;font-weight:700}
+.bar{height:8px;border-radius:99px;background:#e6efe7;overflow:hidden;min-width:70px}
+.bar i{display:block;height:100%;background:var(--g);border-radius:99px}
+.days{display:flex;align-items:flex-end;gap:3px;height:90px;margin-top:6px}
+.days div{flex:1;background:var(--g);border-radius:4px 4px 0 0;min-height:2px;opacity:.85}
+.days div:hover{opacity:1}
+.mut{color:var(--mut);font-size:13px}
+.cnt{font-size:12px;font-weight:800;color:var(--gd);background:#e3f4e4;border-radius:99px;padding:1px 10px;white-space:nowrap}
+.strip{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;background:#f3f8f3;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-weight:700;font-size:14px}
+.strip .f{margin:0;min-width:140px}
+.strip .grow{flex:1}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#17211a;color:#fff;padding:10px 18px;border-radius:99px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
 .toast.on{opacity:1}
 
@@ -108,10 +132,16 @@ code{background:#eef3ee;border-radius:6px;padding:1px 6px;font-size:13px;directi
   <div>
     <div class="tabs" role="tablist" id="tabs"></div>
 
-    <section class="panel" id="p-brand" data-title="الهوية والألوان">
-      <h2>الهوية والألوان</h2>
-      <p class="sub">الاسم والوصف واللوجو وألوان الصفحة.</p>
+    <section class="panel" id="p-brand" data-title="الهوية">
+      <h2>الهوية</h2>
+      <p class="sub">الاسم والوصف واللوجو.</p>
       <div id="brandBox"></div>
+    </section>
+
+    <section class="panel" id="p-style" data-title="المظهر">
+      <h2>المظهر</h2>
+      <p class="sub">الخلفية والأزرار والظلال والحركات والخطوط. المعاينة على الجنب بتتغير لحظيًا.</p>
+      <div id="styleBox"></div>
     </section>
 
     <section class="panel" id="p-socials" data-title="السوشيال">
@@ -119,6 +149,7 @@ code{background:#eef3ee;border-radius:6px;padding:1px 6px;font-size:13px;directi
       <p class="sub">بتظهر تحت الوصف مباشرة. للواتساب استخدم رابط بالشكل <code>https://wa.me/20100XXXXXXX</code></p>
       <div id="socialsBox"></div>
       <div class="add"><button class="btn" id="addSocial">+ أيقونة جديدة</button></div>
+      <div id="socialsOpts"></div>
     </section>
 
     <section class="panel" id="p-offers" data-title="العروض والعداد">
@@ -130,11 +161,18 @@ code{background:#eef3ee;border-radius:6px;padding:1px 6px;font-size:13px;directi
     <section class="panel" id="p-links" data-title="اللينكات">
       <h2>اللينكات</h2>
       <p class="sub">رتّب بالأسهم، وأخفي أي لينك من غير ما تمسحه، وحدد له وقت يظهر فيه ويختفي.</p>
+      <div id="linksStat"></div>
       <div id="linksBox"></div>
       <div class="add">
         <button class="btn pri" id="addLink">+ لينك جديد</button>
         <button class="btn" id="addHeading">+ عنوان قسم</button>
       </div>
+    </section>
+
+        <section class="panel" id="p-stats" data-title="الإحصائيات">
+      <h2>الإحصائيات</h2>
+      <p class="sub">عدد الناس اللي زاروا الصفحة وضغطوا على كل لينك، من غير ضغطات وهمية.</p>
+      <div id="statsBox"></div>
     </section>
 
     <section class="panel" id="p-track" data-title="التتبع">
@@ -180,17 +218,24 @@ const DEFAULT_LOGO = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   '<circle cx="100" cy="100" r="82" fill="none" stroke="#2a9d2f" stroke-width="3"/>' +
   '<text x="100" y="98" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="40" fill="#1fa84a">Safe</text>' +
   '<text x="100" y="140" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="40" fill="#1fa84a">Zone</text></svg>');
+const THEME_DEFAULT = {
+  bg: '#2a9d2f', bg2: '#238a28', text: '#ffffff', font: 'Cairo',
+  bgType: 'gradient', bgAngle: '180', bgAnim: 'none', bgImage: '', bgOverlayColor: '#000000', bgOverlay: '35', bgBlur: '0',
+  btnStyle: 'solid', btn: '#ffffff', btn2: '#e8f6e9', btnAngle: '135', btnText: '#1f8f26', btnBorder: '#ffffff', btnBorderW: '0',
+  radius: '14', btnSize: 'md', btnGap: '12',
+  btnShadow: 'soft', btnShadowColor: '#000000', btnHover: 'lift', btnEnter: 'fade', btnHighlight: 'pulse',
+  logoShape: 'circle', logoSize: '112', logoRing: '0', logoAnim: 'none', logoBg: 'white', logoBgColor: '#ffffff',
+  socialStyle: 'plain', socialSize: '30', socialPos: 'bottom',
+  wHead: '800', wBody: '600', fontName: 'DIN Next Arabic', fontFiles: []
+};
 const DEFAULT = {
   brand: { name: 'Safezonestore', tagline: 'المنتجات المعلن عنها موجودة\nهنا... في السيف زوون', logo: DEFAULT_LOGO },
-  theme: { bg: '#2a9d2f', bg2: '#238a28', btn: '#ffffff', btnText: '#1f8f26', text: '#ffffff', radius: '14',
-    bgImage: '', bgSize: 'cover', bgPos: 'center', bgFixed: false, bgOverlay: '#000000', bgOverlayOp: '30', bgBlur: '0', bgAnim: 'none',
-    btnStyle: 'solid', btnShadow: 'none', btnShadowColor: '#000000', btnBorderW: '0', btnBorderC: '#ffffff', btnSize: 'md', btnGap: '12',
-    btnAnim: 'none', btnHover: 'none', entrance: 'none', logoAnim: 'none', animSpeed: '1' },
+  theme: THEME_DEFAULT,
   socials: [
-    { type: 'tiktok', url: 'https://www.tiktok.com/@' },
-    { type: 'instagram', url: 'https://www.instagram.com/' },
-    { type: 'whatsapp', url: 'https://wa.me/' },
-    { type: 'facebook', url: 'https://www.facebook.com/' }
+    { type: 'tiktok', url: '' },
+    { type: 'instagram', url: '' },
+    { type: 'whatsapp', url: '' },
+    { type: 'facebook', url: '' }
   ],
   announcement: { enabled: false, text: '🔥 خصم خاص لفترة محدودة على كل المنتجات', url: '' },
   countdown: { enabled: false, title: 'العرض بينتهي خلال', end: '', buttonText: 'اطلب دلوقتي', url: 'https://safe-zone.store', hideWhenEnded: true, endedText: 'العرض انتهى' },
@@ -198,19 +243,43 @@ const DEFAULT = {
     { id: 'a1', type: 'link', enabled: true, title: 'للطلب من مصر (متجرنا سيف زوون)', subtitle: '', url: 'https://safe-zone.store', image: DEFAULT_LOGO, badge: '', highlight: false, start: '', end: '' },
     { id: 'a2', type: 'link', enabled: true, title: 'لطلب أرجيفيت فوكس خارج مصر (دول الخليج وغيرها)', subtitle: '', url: '', image: '', badge: '', highlight: false, start: '', end: '' }
   ],
-  pixels: { meta: '', tiktok: '' }
+  pixels: { meta: '', tiktok: '' },
+  analytics: { enabled: false, url: '', key: '' }
 };
 const SOCIAL_TYPES = [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['whatsapp', 'WhatsApp'], ['facebook', 'Facebook'], ['youtube', 'YouTube'], ['telegram', 'Telegram'], ['web', 'موقع'], ['mail', 'إيميل'], ['phone', 'اتصال']];
 
 const $ = s => document.querySelector(s);
 const clone = o => JSON.parse(JSON.stringify(o));
 const uid = () => Math.random().toString(36).slice(2, 8);
+function safeUrl(u) {
+  u = (u || '').trim();
+  if (!u) return '#';
+  if (/^(https?:\/\/|tel:|mailto:)/i.test(u)) return u;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(u)) return '#';
+  return 'https://' + u;
+}
+/* رابط حقيقي ولا وهمي/ناقص؟ الوهمي مبيظهرش للزوار */
+function isReal(u) {
+  u = (u || '').trim();
+  if (!u || u === '#') return false;
+  let x; try { x = new URL(safeUrl(u)); } catch (e) { return false; }
+  if (x.protocol === 'tel:' || x.protocol === 'mailto:') return x.pathname.replace(/[^\w@+]/g, '').length > 4;
+  if (!/^https?:$/.test(x.protocol) || !x.hostname.includes('.')) return false;
+  const host = x.hostname.replace(/^(www|m)\./, '');
+  const path = x.pathname.replace(/\/+$/, '');
+  if (/^(tiktok\.com|instagram\.com|facebook\.com|fb\.com|youtube\.com|t\.me|snapchat\.com|x\.com|twitter\.com)$/.test(host)) return path.length > 1 && path !== '/@';
+  if (host === 'wa.me') return /\d{6,}/.test(path);
+  if (host === 'api.whatsapp.com' || host === 'web.whatsapp.com') return /\d{6,}/.test(path + x.search);
+  return true;
+}
+
 function norm(c) {
   c = c || {}; const d = clone(DEFAULT);
   return {
     brand: { ...d.brand, ...c.brand }, theme: { ...d.theme, ...c.theme },
     announcement: { ...d.announcement, ...c.announcement }, countdown: { ...d.countdown, ...c.countdown },
     pixels: { ...d.pixels, ...c.pixels },
+    analytics: { ...d.analytics, ...c.analytics },
     socials: Array.isArray(c.socials) ? c.socials : d.socials,
     links: Array.isArray(c.links) ? c.links : d.links
   };
@@ -245,10 +314,19 @@ function field(label, obj, key, o = {}) {
     i.onchange = () => { obj[key] = i.checked; push(); o.on && o.on(); };
     wrap.append(i, h('span', {}, label)); return wrap;
   }
+  if (type === 'range') {
+    const ri = h('input', { type: 'range', min: o.min, max: o.max, step: o.step || 1 });
+    ri.value = obj[key] ?? o.min;
+    const val = h('b', { class: 'rv' }, ri.value + (o.unit || ''));
+    ri.oninput = () => { obj[key] = ri.value; val.textContent = ri.value + (o.unit || ''); push(); o.on && o.on(ri.value); };
+    wrap.append(h('span', {}, label, val), ri);
+    if (o.hint) wrap.append(h('small', {}, o.hint));
+    return wrap;
+  }
   let i;
   if (type === 'textarea') i = h('textarea', { rows: 2 });
   else if (type === 'select') i = h('select', {}, o.options.map(([v, t]) => h('option', { value: v }, t)));
-  else i = h('input', { type, min: o.min, max: o.max, step: o.step });
+  else i = h('input', { type });
   if (o.ph) i.placeholder = o.ph;
   i.value = obj[key] ?? '';
   const upd = () => { obj[key] = i.value; push(); o.on && o.on(i.value); };
@@ -271,14 +349,15 @@ function resize(file, max, mime) {
     img.onerror = rej; img.src = u;
   });
 }
-function imageField(label, obj, key, max, mime) {
+function imageField(label, obj, key, max, mime, cb) {
   const pv = h('img', { class: 'pv', alt: '' });
   const url = h('input', { type: 'text', placeholder: 'أو الصق رابط الصورة' });
   const file = h('input', { type: 'file', accept: 'image/*' });
   const sync = () => { const v = obj[key] || ''; pv.src = v; pv.style.display = v ? '' : 'none'; url.value = v.startsWith('data:') ? '' : v; };
-  file.onchange = async () => { if (file.files[0]) { try { obj[key] = await resize(file.files[0], max, mime); sync(); push(); } catch (e) { toast('الصورة دي مش شغالة'); } } };
+  file.onchange = async () => { if (file.files[0]) { try { obj[key] = await resize(file.files[0], max, mime); sync(); push(); cb && cb(); } catch (e) { toast('الصورة دي مش شغالة'); } } };
   url.oninput = () => { obj[key] = url.value.trim(); pv.src = obj[key]; pv.style.display = obj[key] ? '' : 'none'; push(); };
-  const clear = h('button', { class: 'btn sm', type: 'button' }, 'مسح'); clear.onclick = () => { obj[key] = ''; file.value = ''; sync(); push(); };
+  url.onchange = () => { cb && cb(); };
+  const clear = h('button', { class: 'btn sm', type: 'button' }, 'مسح'); clear.onclick = () => { obj[key] = ''; file.value = ''; sync(); push(); cb && cb(); };
   sync();
   return h('div', { class: 'imgf' }, h('span', {}, label), h('div', { class: 'r' }, pv, file, clear), url);
 }
@@ -291,47 +370,12 @@ function buildBrand() {
   b.append(
     field('اسم الصفحة', cfg.brand, 'name'),
     field('الوصف تحت الاسم', cfg.brand, 'tagline', { type: 'textarea', hint: 'ينفع تكتب سطرين، وكل سطر جديد بيظهر في سطر لوحده.' }),
-    imageField('اللوجو', cfg.brand, 'logo', 320, 'image/png'),
-    h('div', { class: 'group' }, h('h3', {}, 'الألوان والشكل'),
-      h('div', { class: 'colors' },
-        field('خلفية (فوق)', cfg.theme, 'bg', { type: 'color' }),
-        field('خلفية (تحت)', cfg.theme, 'bg2', { type: 'color' }),
-        field('لون الزر', cfg.theme, 'btn', { type: 'color' }),
-        field('لون كتابة الزر', cfg.theme, 'btnText', { type: 'color' }),
-        field('لون الكتابة', cfg.theme, 'text', { type: 'color' })),
-      h('div', { style: 'margin-top:12px' }, field('شكل الأزرار', cfg.theme, 'radius', { type: 'select', options: [['14', 'مدوّر'], ['999', 'كبسولة'], ['6', 'حواف خفيفة']] })),
-      h('small', { style: 'color:var(--mut)' }, 'لو خلّيت لون الخلفية فوق وتحت زي بعض هتاخد لون واحد ثابت.')));
-  const T = cfg.theme;
-  const S = (l, k, opts, hint) => field(l, T, k, { type: 'select', options: opts, hint });
-  const R = (l, k, min, max, step, hint) => field(l, T, k, { type: 'range', min, max, step, hint });
-  const C = (l, k) => field(l, T, k, { type: 'color' });
-  b.append(
-    h('div', { class: 'group' }, h('h3', {}, 'خلفية بصورة'),
-      imageField('صورة الخلفية (لو فاضية بيتستخدم اللون)', T, 'bgImage', 1080, 'image/jpeg'),
-      h('div', { class: 'row2' },
-        S('حجم الصورة', 'bgSize', [['cover', 'تغطية كاملة'], ['contain', 'احتواء'], ['repeat', 'تكرار (نمط)']]),
-        S('موضع الصورة', 'bgPos', [['center', 'وسط'], ['top', 'أعلى'], ['bottom', 'أسفل']])),
-      field('تثبيت الخلفية أثناء التمرير', T, 'bgFixed', { type: 'checkbox' }),
-      h('div', { class: 'colors' }, C('لون الطبقة فوق الصورة', 'bgOverlay')),
-      R('قوة الطبقة % (لتوضيح الكتابة)', 'bgOverlayOp', 0, 90, 5),
-      R('تغبيش الصورة (px)', 'bgBlur', 0, 20, 1),
-      S('حركة الخلفية', 'bgAnim', [['none', 'بدون'], ['kenburns', 'زوم بطيء (للصور)'], ['gradient', 'تدرج متحرك (للألوان)']])),
-    h('div', { class: 'group' }, h('h3', {}, 'شكل الأزرار'),
-      S('النمط', 'btnStyle', [['solid', 'ممتلئ'], ['outline', 'إطار فقط'], ['glass', 'زجاجي شفاف'], ['gradient', 'تدرج'], ['soft', 'ناعم']]),
-      h('div', { class: 'row2' },
-        S('الحجم', 'btnSize', [['sm', 'صغير'], ['md', 'عادي'], ['lg', 'كبير']]),
-        S('الظل', 'btnShadow', [['none', 'بدون'], ['soft', 'خفيف'], ['medium', 'متوسط'], ['strong', 'قوي'], ['glow', 'توهج'], ['hard', 'ظل صلب (Neo)']])),
-      h('div', { class: 'colors' }, C('لون الظل', 'btnShadowColor'), C('لون الإطار', 'btnBorderC')),
-      R('سمك الإطار (px)', 'btnBorderW', 0, 6, 1),
-      R('المسافة بين الأزرار (px)', 'btnGap', 6, 28, 2)),
-    h('div', { class: 'group' }, h('h3', {}, 'الحركة والأنيميشن'),
-      h('div', { class: 'row2' },
-        S('حركة الأزرار الدائمة', 'btnAnim', [['none', 'بدون'], ['pulse', 'نبض'], ['float', 'طفو'], ['shake', 'اهتزاز كل فترة'], ['glow', 'توهج متكرر'], ['shine', 'لمعة تعدّي']]),
-        S('عند اللمس / المرور', 'btnHover', [['none', 'بدون'], ['lift', 'ارتفاع'], ['grow', 'تكبير'], ['glow', 'توهج']])),
-      h('div', { class: 'row2' },
-        S('ظهور العناصر عند الفتح', 'entrance', [['none', 'بدون'], ['fade', 'تلاشي'], ['fade-up', 'صعود + تلاشي'], ['zoom', 'تكبير']]),
-        S('حركة اللوجو', 'logoAnim', [['none', 'بدون'], ['float', 'طفو'], ['pulse', 'نبض']])),
-      R('سرعة الحركة (1 = عادي)', 'animSpeed', 0.5, 2, 0.1, 'أقل من 1 أبطأ، وأكتر من 1 أسرع.')));
+    imageField('اللوجو (PNG شفاف مدعوم)', cfg.brand, 'logo', 600, 'image/png'),
+    field('خلفية اللوجو', cfg.theme, 'logoBg', { type: 'select', on: buildBrand,
+      options: [['white', 'بيضاء (الشكل الحالي)'], ['none', 'شفافة (لـ PNG بدون خلفية)'], ['color', 'لون تختاره']],
+      hint: 'لو لوجوك PNG شفاف اختار "شفافة" وهيظهر بحجمه وشكله من غير دايرة أو مربع أبيض وراه.' }),
+    cfg.theme.logoBg === 'color' ? h('div', { class: 'colors' }, field('لون خلفية اللوجو', cfg.theme, 'logoBgColor', { type: 'color' })) : null,
+    h('small', { style: 'color:var(--mut)' }, 'حجم اللوجو وحركته من تبويب المظهر.'));
 }
 
 function buildSocials() {
@@ -339,12 +383,14 @@ function buildSocials() {
   cfg.socials.forEach((s, i) => {
     const label = () => (SOCIAL_TYPES.find(t => t[0] === s.type) || [0, s.type])[1];
     const t = h('span', { class: 't' }, label());
-    const d = h('details', { class: 'item' }, h('summary', {}, t),
+    const tgText = () => isReal(s.url) ? 'ظاهر' : 'ناقص، مش هيظهر';
+    const tg = h('span', { class: 'tag' }, tgText());
+    const d = h('details', { class: 'item' }, h('summary', {}, t, cntEl('social_' + s.type), tg),
       h('div', { class: 'body' },
         h('div', { class: 'ctl' }, ctlBtn('↑', () => move(cfg.socials, i, -1, buildSocials)), ctlBtn('↓', () => move(cfg.socials, i, 1, buildSocials)),
           ctlBtn('حذف', () => { cfg.socials.splice(i, 1); buildSocials(); push(); }, 'dng')),
         field('النوع', s, 'type', { type: 'select', options: SOCIAL_TYPES, on: () => { t.textContent = label(); } }),
-        field('الرابط', s, 'url', { ph: 'https://' })));
+        field('الرابط', s, 'url', { ph: 'https://', on: () => { tg.textContent = tgText(); } })));
     box.append(d);
   });
 }
@@ -370,10 +416,12 @@ function buildLinks(openIdx = -1) {
   const box = $('#linksBox'); box.innerHTML = '';
   if (!cfg.links.length) box.append(h('p', { class: 'sub' }, 'مفيش لينكات لسه. ضيف أول لينك من تحت.'));
   cfg.links.forEach((l, i) => {
+    if (l.highlight && !l.anim) l.anim = 'default';
     const isH = l.type === 'heading';
     const t = h('span', { class: 't' }, l.title || (isH ? 'عنوان قسم' : 'لينك بدون عنوان'));
-    const tag = h('span', { class: 'tag' }, isH ? 'عنوان' : (l.enabled === false ? 'مخفي' : 'لينك'));
-    const upd = () => { tag.textContent = isH ? 'عنوان' : (l.enabled === false ? 'مخفي' : 'لينك'); };
+    const tagText = () => isH ? 'عنوان' : (!isReal(l.url) ? 'ناقص، مش هيظهر' : (l.enabled === false ? 'مخفي' : 'لينك'));
+    const tag = h('span', { class: 'tag' }, tagText());
+    const upd = () => { tag.textContent = tagText(); };
     const body = h('div', { class: 'body' },
       h('div', { class: 'ctl' }, ctlBtn('↑', () => move(cfg.links, i, -1, buildLinks)), ctlBtn('↓', () => move(cfg.links, i, 1, buildLinks)),
         ctlBtn('نسخ', () => { const n = clone(l); n.id = uid(); cfg.links.splice(i + 1, 0, n); buildLinks(i + 1); push(); }),
@@ -386,15 +434,16 @@ function buildLinks(openIdx = -1) {
         field('ظاهر على الصفحة', l, 'enabled', { type: 'checkbox', on: upd }),
         field('عنوان الزر', l, 'title', { on: v => { t.textContent = v || 'لينك بدون عنوان'; } }),
         field('سطر صغير تحت العنوان (اختياري)', l, 'subtitle'),
-        field('الرابط', l, 'url', { ph: 'https://' }),
+        field('الرابط', l, 'url', { ph: 'https://', on: upd }),
         imageField('صورة الزر (اختياري)', l, 'image', 200, 'image/jpeg'),
         h('div', { class: 'row2' },
           field('شارة صغيرة', l, 'badge', { ph: 'جديد / خصم 20%' }),
-          h('div', {}, field('نبض لجذب الانتباه', l, 'highlight', { type: 'checkbox' }))),
+          h('div', {})),
+        field('حركة لفت الانتباه لهذا اللينك', l, 'anim', { type: 'select', options: [['', 'بدون'], ['default', 'زي الافتراضي (من المظهر)'], ...ANIM_OPTS], on: v => { l.highlight = !!v; }, hint: 'شوف الحركة في المعاينة على الجنب. بتشتغل حتى لو الصفحة مفتوحة من الموبايل.' }),
         h('div', { class: 'group' }, h('h3', {}, 'جدولة الظهور (اختياري)'),
           h('div', { class: 'row2' }, field('يظهر من', l, 'start', { type: 'datetime-local' }), field('يختفي في', l, 'end', { type: 'datetime-local' }))));
     }
-    const d = h('details', { class: 'item' }, h('summary', {}, t, tag), body);
+    const d = h('details', { class: 'item' }, h('summary', {}, t, cntEl(l.id), tag), body);
     if (i === openIdx) d.open = true;
     box.append(d);
   });
@@ -407,8 +456,383 @@ function buildTrack() {
     h('div', { class: 'note' }, 'لو بتعلن على الصفحة دي، اضغط على المعاينة وافتح الصفحة الحقيقية بعد النشر وتأكد من Meta Pixel Helper إن الأحداث بتوصل.'));
 }
 
+/* ---------- المظهر ---------- */
+const PRESETS = [
+  { name: 'أخضر سيف زوون', prev: 'linear-gradient(#2a9d2f,#238a28)', fg: '#ffffff', t: {} },
+  { name: 'داكن فاخر', prev: 'linear-gradient(#0f1a12,#050807)', fg: '#2fbf4a',
+    t: { bg: '#0f1a12', bg2: '#050807', bgAngle: '160', bgAnim: 'bubbles', btnStyle: 'gradient', btn: '#2fbf4a', btn2: '#178a2e', btnText: '#ffffff', btnShadow: 'glow', btnShadowColor: '#2fbf4a', text: '#ffffff' } },
+  { name: 'زجاجي', prev: 'linear-gradient(#1b7f3a,#0b3d1e)', fg: '#ffffff',
+    t: { bg: '#1b7f3a', bg2: '#0b3d1e', bgAnim: 'shift', btnStyle: 'glass', btnShadow: 'soft', text: '#ffffff' } },
+  { name: 'ذهبي', prev: 'linear-gradient(#111111,#000000)', fg: '#f5d06a',
+    t: { bg: '#111111', bg2: '#000000', btnStyle: 'gradient', btn: '#f5d06a', btn2: '#c8962a', btnText: '#1a1200', btnShadow: 'glow', btnShadowColor: '#c8962a', text: '#f5d06a', logoRing: '3' } },
+  { name: 'أبيض نظيف', prev: 'linear-gradient(#f6faf6,#e6f2e7)', fg: '#1c2a1e',
+    t: { bg: '#f6faf6', bg2: '#e6f2e7', btnStyle: 'solid', btn: '#2a9d2f', btnText: '#ffffff', btnShadow: 'soft', text: '#1c2a1e' } }
+];
+const FONT_LIST = ['Cairo', 'Tajawal', 'Almarai', 'Changa', 'El Messiri', 'Readex Pro', 'Noto Kufi Arabic'];
+const LOGO_ANIM_OPTS = [['none', 'ثابت'], ['pulse', 'نبض (تكبير)'], ['heartbeat', 'نبضة قلب'], ['shake', 'اهتزاز'], ['wiggle', 'تمايل'], ['bounce', 'قفز'],
+  ['float', 'طفو'], ['glow', 'توهج'], ['flash', 'وميض'], ['swing', 'تأرجح'], ['rubber', 'مطاط'], ['tada', 'تادا'], ['jello', 'جيلي'], ['rainbow', 'توهج ملون']];
+const WEIGHTS = [['100', '100 - رفيع جدًا'], ['200', '200 - رفيع'], ['300', '300 - خفيف'], ['400', '400 - عادي'], ['500', '500 - متوسط'],
+  ['600', '600 - نص عريض'], ['700', '700 - عريض'], ['800', '800 - عريض جدًا'], ['900', '900 - أسود']];
+const ANIM_OPTS = [['pulse', 'نبض (حلقة)'], ['heartbeat', 'نبضة قلب'], ['shake', 'اهتزاز'], ['wiggle', 'تمايل'], ['bounce', 'قفز'], ['float', 'طفو'],
+  ['glow', 'توهج'], ['flash', 'وميض'], ['shine', 'لمعان بيعدي'], ['swing', 'تأرجح'], ['rubber', 'مطاط'], ['tada', 'تادا'], ['jello', 'جيلي'], ['rainbow', 'حلقة ملونة']];
+
+let prevTheme = null;
+function rebuildTheme() { buildStyle(); buildBrand(); buildSocialOpts(); }
+
+/* ---------- رفع ملفات الخط على GitHub ---------- */
+function fileToB64(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(f); }); }
+async function ghPutFile(path, b64, msg) {
+  const api = `https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}/contents/` + path.split('/').map(encodeURIComponent).join('/');
+  const H = { Authorization: 'Bearer ' + gh.token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
+  let sha;
+  const r = await fetch(api + '?ref=' + encodeURIComponent(gh.branch || 'main') + '&t=' + Date.now(), { headers: H, cache: 'no-store' });
+  if (r.ok) sha = (await r.json()).sha; else if (r.status !== 404) throw r.status;
+  const p = await fetch(api, { method: 'PUT', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: msg, content: b64, sha, branch: gh.branch || 'main' }) });
+  if (!p.ok) throw p.status;
+}
+function guessWeight(name) {
+  const n = name.toLowerCase().replace(/[^a-z]/g, '');
+  const map = [['ultralight', 100], ['thin', 100], ['extralight', 200], ['semibold', 600], ['demibold', 600], ['extrabold', 800], ['ultrabold', 800], ['black', 900], ['heavy', 900], ['light', 300], ['medium', 500], ['bold', 700], ['regular', 400], ['normal', 400], ['book', 400]];
+  for (const [k, w] of map) if (n.includes(k)) return w;
+  return 400;
+}
+async function uploadFonts(files) {
+  if (!gh.token || !gh.owner || !gh.repo) { showTab('p-publish'); toast('كمّل بيانات GitHub والـ Token من تبويب النشر الأول'); return; }
+  const t = cfg.theme; if (!Array.isArray(t.fontFiles)) t.fontFiles = [];
+  let n = 0;
+  for (const f of files) {
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    if (!['woff2', 'woff', 'otf', 'ttf'].includes(ext)) { toast('امتداد مش مدعوم: ' + f.name); continue; }
+    if (/italic|oblique/i.test(f.name)) continue;
+    const safe = f.name.replace(/[^\w.\-]+/g, '_'), path = 'fonts/' + safe;
+    toast('جاري رفع ' + safe + '...');
+    try {
+      await ghPutFile(path, await fileToB64(f), 'Add font ' + safe);
+      const entry = { w: String(guessWeight(f.name)), file: path }, i = t.fontFiles.findIndex(x => x.file === path);
+      if (i >= 0) t.fontFiles[i] = entry; else t.fontFiles.push(entry);
+      n++;
+    } catch (e) { toast('فشل رفع ' + f.name + ' (' + e + ')'); }
+  }
+  if (n) { t.font = 'custom'; buildStyle(); push(); toast('اترفع ' + n + ' ملف. الخط هيظهر بعد دقيقة لحد ما GitHub ينشره'); }
+}
+function fontBox(t) {
+  const rows = (t.fontFiles || []).map((f, i) => h('div', { class: 'row2', style: 'align-items:end;margin-bottom:6px' },
+    field(f.file.replace('fonts/', ''), f, 'w', { type: 'select', options: WEIGHTS }),
+    h('div', { style: 'margin-bottom:12px' }, ctlBtn('حذف من القايمة', () => { t.fontFiles.splice(i, 1); if (!t.fontFiles.length && t.font === 'custom') t.font = 'Cairo'; buildStyle(); push(); }, 'dng'))));
+  const inp = h('input', { type: 'file', accept: '.woff2,.woff,.otf,.ttf', multiple: true, hidden: true });
+  inp.onchange = () => { if (inp.files.length) uploadFonts([...inp.files]); inp.value = ''; };
+  return h('div', { class: 'note', style: 'background:#f3f8f3;border-color:var(--line)' },
+    h('b', {}, 'خط مخصص (زي DIN Next Arabic)'),
+    h('p', { style: 'margin:6px 0 10px;font-size:13px', html: 'ارفع ملفات الخط (woff2 أو woff أو otf أو ttf)، ويفضل تحدد كل الأوزان مرة واحدة. الوزن بيتعرف من اسم الملف (Light وRegular وMedium وBold وHeavy...) وتقدر تعدله. لازم يكون معاك ترخيص استخدام الخط على الويب.' }),
+    field('اسم الخط', t, 'fontName', { hint: 'أي اسم يعجبك، مثلًا DIN Next Arabic.' }),
+    ...rows,
+    h('div', { class: 'add' }, ctlBtn('رفع ملفات الخط', () => inp.click(), 'pri'), inp),
+    h('small', { style: 'color:var(--mut);display:block;margin-top:8px' }, 'الملفات بتترفع على مستودع GitHub في فولدر fonts، فلازم الـ Token يكون متسجل في تبويب النشر. بعد الرفع الخط بيتفعّل، واضغط نشر على الموقع.'));
+}
+
+function buildStyle() {
+  const b = $('#styleBox'); b.innerHTML = '';
+  const t = cfg.theme, re = buildStyle;
+  const grp = (title, ...kids) => h('div', { class: 'group' }, h('h3', {}, title), ...kids);
+  const colors = (...kids) => h('div', { class: 'colors' }, ...kids);
+  const sel = (label, key, options, extra = {}) => field(label, t, key, { type: 'select', options, ...extra });
+
+  const presets = h('div', { class: 'presets' }, PRESETS.map(p => {
+    const x = h('button', { class: 'pre', type: 'button', style: `background:${p.prev};color:${p.fg}` }, p.name);
+    x.onclick = () => {
+      const o = clone(cfg.theme); prevTheme = o;
+      const keep = o.bgType === 'image' && o.bgImage;
+      cfg.theme = { ...clone(DEFAULT.theme), ...p.t, bgImage: o.bgImage || '', ...(keep ? { bgType: 'image', bgOverlay: o.bgOverlay, bgOverlayColor: o.bgOverlayColor, bgBlur: o.bgBlur, bgAnim: o.bgAnim } : {}) };
+      rebuildTheme(); push(); toast('اتطبّق قالب: ' + p.name);
+    };
+    return x;
+  }));
+
+  /* الخلفية */
+  const onBgImg = () => { t.bgType = t.bgImage ? 'image' : (t.bgType === 'image' ? 'gradient' : t.bgType); buildStyle(); push(); };
+  const bgKids = [
+    sel('نوع الخلفية', 'bgType', [['gradient', 'تدرج لوني'], ['solid', 'لون ثابت'], ['image', 'صورة']], { on: re }),
+    imageField('صورة الخلفية (اختياري)', t, 'bgImage', 1400, 'image/jpeg', onBgImg),
+    h('small', { style: 'color:var(--mut);display:block;margin:-6px 0 12px' }, t.bgImage
+      ? 'الصورة مرفوعة. اختار نوع الخلفية "صورة" عشان تظهر، أو اضغط مسح.'
+      : 'ارفع صورة وهتتفعّل لوحدها. الصورة بتتصغّر تلقائيًا، والأفضل تكون طولية وخفيفة عشان الصفحة تفتح بسرعة.')];
+  if (t.bgType === 'image') {
+    if (!t.bgImage) bgKids.push(h('div', { class: 'note' }, 'اخترت "صورة" بس لسه مرفعتش صورة. ارفع صورة من فوق، ولحد وقتها الصفحة بتستخدم التدرج.'));
+    bgKids.push(
+      colors(field('لون الطبقة فوق الصورة', t, 'bgOverlayColor', { type: 'color' })),
+      field('شدة الطبقة (بتخلي الكتابة أوضح)', t, 'bgOverlay', { type: 'range', min: 0, max: 90, unit: '%' }),
+      field('تغبيش الصورة', t, 'bgBlur', { type: 'range', min: 0, max: 20, unit: 'px' }),
+      sel('حركة الخلفية', 'bgAnim', [['none', 'بدون'], ['zoom', 'تقريب بطيء'], ['bubbles', 'فقاعات طايرة']]));
+  } else if (t.bgType === 'solid') {
+    bgKids.push(colors(field('لون الخلفية', t, 'bg', { type: 'color' })),
+      sel('حركة الخلفية', 'bgAnim', [['none', 'بدون'], ['bubbles', 'فقاعات طايرة']]));
+  } else {
+    bgKids.push(colors(field('لون فوق', t, 'bg', { type: 'color' }), field('لون تحت', t, 'bg2', { type: 'color' })),
+      field('زاوية التدرج', t, 'bgAngle', { type: 'range', min: 0, max: 360, step: 5, unit: '°' }),
+      sel('حركة الخلفية', 'bgAnim', [['none', 'بدون'], ['shift', 'تدرج متحرك'], ['bubbles', 'فقاعات طايرة']]));
+  }
+
+  /* الأزرار */
+  const btnKids = [
+    sel('شكل الزر', 'btnStyle', [['solid', 'لون ثابت'], ['gradient', 'تدرج'], ['outline', 'حدود فقط'], ['glass', 'زجاجي شفاف']], { on: re,
+      hint: 'في حدود فقط والزجاجي، لون الكتابة هو لون الكتابة العام من تحت.' })];
+  const bc = [field('لون الزر', t, 'btn', { type: 'color' })];
+  if (t.btnStyle === 'gradient') bc.push(field('لون التدرج التاني', t, 'btn2', { type: 'color' }));
+  bc.push(field('لون كتابة الزر', t, 'btnText', { type: 'color' }), field('لون الإطار', t, 'btnBorder', { type: 'color' }));
+  btnKids.push(colors(...bc));
+  if (t.btnStyle === 'gradient') btnKids.push(field('زاوية تدرج الزر', t, 'btnAngle', { type: 'range', min: 0, max: 360, step: 5, unit: '°' }));
+  btnKids.push(
+    field('سمك الإطار', t, 'btnBorderW', { type: 'range', min: 0, max: 6, unit: 'px' }),
+    sel('انحناء الحواف', 'radius', [['14', 'مدوّر'], ['999', 'كبسولة'], ['6', 'حواف خفيفة'], ['0', 'حاد']]),
+    sel('حجم الأزرار', 'btnSize', [['sm', 'صغير'], ['md', 'متوسط'], ['lg', 'كبير']]),
+    field('المسافة بين الأزرار', t, 'btnGap', { type: 'range', min: 6, max: 28, unit: 'px' }));
+
+  /* الظلال والحركات */
+  const fxKids = [sel('الظل', 'btnShadow', [['none', 'بدون'], ['soft', 'ناعم'], ['strong', 'قوي'], ['glow', 'توهج ملون'], ['hard', 'ظل صلب']], { on: re })];
+  if (t.btnShadow === 'glow' || t.btnShadow === 'hard') fxKids.push(colors(field('لون الظل', t, 'btnShadowColor', { type: 'color' })));
+  fxKids.push(
+    sel('لما الماوس يقف على الزر', 'btnHover', [['lift', 'يطلع لفوق'], ['grow', 'يكبر'], ['bright', 'يفتح لونه'], ['none', 'بدون']]),
+    sel('حركة ظهور الأزرار', 'btnEnter', [['none', 'بدون'], ['fade', 'ظهور تدريجي'], ['up', 'طلوع من تحت'], ['slide', 'انزلاق'], ['zoom', 'تكبير']]),
+    sel('الحركة الافتراضية للفت الانتباه', 'btnHighlight', ANIM_OPTS,
+      { hint: 'بتتطبق على اللينكات اللي اخترت لها "زي الافتراضي". وتقدر تختار حركة مختلفة لكل لينك من تبويب اللينكات.' }));
+
+  /* النصوص واللوجو والسوشيال */
+  const fontOpts = FONT_LIST.map(f => [f, f]);
+  if (Array.isArray(t.fontFiles) && t.fontFiles.length) fontOpts.push(['custom', (t.fontName || 'خط مخصص') + ' (مرفوع)']);
+  const fontKids = [
+    sel('الخط', 'font', fontOpts),
+    sel('وزن العناوين والأزرار', 'wHead', WEIGHTS),
+    sel('وزن الوصف والنصوص الصغيرة', 'wBody', WEIGHTS),
+    colors(field('لون الكتابة العام', t, 'text', { type: 'color' })),
+    fontBox(t)];
+  const logoKids = [
+    sel('شكل اللوجو (لو الخلفية مش شفافة)', 'logoShape', [['circle', 'دايرة'], ['rounded', 'مربع مدوّر'], ['square', 'مربع']]),
+    field('حجم اللوجو', t, 'logoSize', { type: 'range', min: 60, max: 220, unit: 'px' }),
+    field('إطار حوالين اللوجو', t, 'logoRing', { type: 'range', min: 0, max: 10, unit: 'px' }),
+    sel('حركة لفت الانتباه للوجو', 'logoAnim', LOGO_ANIM_OPTS, { hint: 'خلفية اللوجو (شفافة أو بيضاء) من تبويب الهوية.' })];
+
+  b.append(
+    grp('قوالب جاهزة', presets, prevTheme ? h('div', { class: 'add' }, ctlBtn('↩ تراجع عن القالب', () => { cfg.theme = prevTheme; prevTheme = null; rebuildTheme(); push(); toast('اتلغى القالب ورجعت إعداداتك'); })) : null, h('small', { style: 'color:var(--mut);display:block;margin-top:8px' }, 'القالب بيغيّر ألوان وشكل الأزرار والحركات ولون الكتابة والخط، لكن بيحتفظ بصورة الخلفية لو كانت شغالة. لو مش عاجبك اضغط تراجع.')),
+    grp('الخلفية', ...bgKids),
+    grp('الأزرار', ...btnKids),
+    grp('الظلال والحركات', ...fxKids),
+    grp('الخط والأوزان', ...fontKids),
+    grp('اللوجو', ...logoKids));
+}
+
+/* ---------- الإحصائيات (Supabase) ---------- */
+const STAT_KEY = 'sz-stat-v1';
+let stat = { secret: '', days: '30' };
+try { stat = { ...stat, ...JSON.parse(localStorage.getItem(STAT_KEY) || '{}') }; } catch (e) { }
+const saveStat = () => { try { localStorage.setItem(STAT_KEY, JSON.stringify(stat)); } catch (e) { } };
+const SB_RE = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i;
+
+function makeSQL(secret) {
+  const sec = String(secret).replace(/'/g, "''");
+  return `-- عداد Safe Zone: انسخ كل ده والصقه في Supabase > SQL Editor واضغط Run
+create table if not exists public.sz_settings (key text primary key, value text not null);
+alter table public.sz_settings enable row level security;
+insert into public.sz_settings (key, value) values ('admin_secret', '${sec}')
+  on conflict (key) do update set value = excluded.value;
+
+create table if not exists public.sz_events (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  kind text not null check (kind in ('view','click')),
+  link_id text,
+  label text,
+  visitor text not null
+);
+create index if not exists sz_events_idx on public.sz_events (kind, link_id, created_at);
+alter table public.sz_events enable row level security;
+
+create or replace function public.sz_track(p_kind text, p_link_id text, p_label text, p_visitor text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if p_kind not in ('view','click') or p_visitor is null or length(p_visitor) < 8 or length(p_visitor) > 64 then return; end if;
+  if p_link_id is not null and length(p_link_id) > 60 then return; end if;
+  if (select count(*) from sz_events where visitor = p_visitor and created_at > now() - interval '1 hour') > 100 then return; end if;
+  if exists (select 1 from sz_events where visitor = p_visitor and kind = p_kind
+             and coalesce(link_id, '') = coalesce(p_link_id, '') and created_at > now() - interval '1 hour') then return; end if;
+  insert into sz_events (kind, link_id, label, visitor) values (p_kind, p_link_id, left(coalesce(p_label, ''), 80), p_visitor);
+end $$;
+
+create or replace function public.sz_stats(p_secret text, p_days int default 30)
+returns json language plpgsql security definer set search_path = public as $$
+declare since timestamptz := now() - make_interval(days => greatest(1, least(coalesce(p_days, 30), 3650)));
+begin
+  if not exists (select 1 from sz_settings where key = 'admin_secret' and value = p_secret) then
+    raise exception 'unauthorized';
+  end if;
+  return json_build_object(
+    'visitors', (select count(distinct visitor) from sz_events where kind = 'view' and created_at >= since),
+    'clickers', (select count(distinct visitor) from sz_events where kind = 'click' and created_at >= since),
+    'clicks', (select count(*) from sz_events where kind = 'click' and created_at >= since),
+    'links', coalesce((select json_agg(x) from (
+        select link_id, max(label) as label, count(*) as clicks, count(distinct visitor) as people
+        from sz_events where kind = 'click' and created_at >= since
+        group by link_id order by count(*) desc) x), '[]'::json),
+    'daily', coalesce((select json_agg(d order by d.day) from (
+        select to_char((created_at at time zone 'Africa/Cairo')::date, 'YYYY-MM-DD') as day,
+               count(distinct visitor) filter (where kind = 'view') as visitors,
+               count(*) filter (where kind = 'click') as clicks
+        from sz_events where created_at >= since group by 1) d), '[]'::json)
+  );
+end $$;
+
+revoke all on function public.sz_track(text, text, text, text) from public;
+grant execute on function public.sz_track(text, text, text, text) to anon, authenticated;
+revoke all on function public.sz_stats(text, int) from public;
+grant execute on function public.sz_stats(text, int) to anon, authenticated;
+`;
+}
+
+async function copySQL() {
+  if (!stat.secret || stat.secret.length < 6) { toast('اكتب باسورد للإحصائيات (6 حروف على الأقل) الأول'); return; }
+  try { await navigator.clipboard.writeText(makeSQL(stat.secret)); toast('اتنسخ كود SQL. الصقه في Supabase'); }
+  catch (e) { toast('النسخ مش متاح في المتصفح ده'); }
+}
+
+function nameOf(id, label) {
+  const l = cfg.links.find(x => x.id === id);
+  if (l && l.title) return l.title;
+  if (id === 'countdown') return 'زر العداد';
+  if (id === 'announcement') return 'شريط الإعلان';
+  if (id && id.startsWith('social_')) return 'أيقونة ' + id.slice(7);
+  return label || id || '—';
+}
+
+let statsData = null;
+const PERIODS = [['1', 'آخر 24 ساعة'], ['7', 'آخر 7 أيام'], ['30', 'آخر 30 يوم'], ['90', 'آخر 90 يوم'], ['3650', 'كل الفترة']];
+
+async function getStats() {
+  const a = cfg.analytics;
+  if (!SB_RE.test(a.url || '') || !a.key) return { msg: 'اكتب Project URL والـ key الأول من قسم الإعداد.' };
+  if (!stat.secret) return { msg: 'اكتب باسورد الإحصائيات الأول.' };
+  const headers = { 'Content-Type': 'application/json', apikey: a.key };
+  if (a.key.startsWith('eyJ')) headers.Authorization = 'Bearer ' + a.key;
+  try {
+    const r = await fetch(a.url.replace(/\/+$/, '') + '/rest/v1/rpc/sz_stats', { method: 'POST', headers, body: JSON.stringify({ p_secret: stat.secret, p_days: parseInt(stat.days, 10) || 30 }) });
+    const txt = await r.text();
+    if (!r.ok) {
+      return { msg: /unauthorized/i.test(txt) ? 'الباسورد غلط، أو مختلف عن اللي كتبته في كود SQL.'
+        : (r.status === 404 || /sz_stats|could not find/i.test(txt)) ? 'كود SQL لسه متنفذش في Supabase. انسخه وشغله الأول.'
+        : (r.status === 401 || r.status === 403) ? 'الـ key غلط.' : 'حصل خطأ (' + r.status + ')' };
+    }
+    return { d: JSON.parse(txt) };
+  } catch (e) { return { msg: 'مقدرتش أوصل لـ Supabase. راجع الـ Project URL واتصال النت.' }; }
+}
+
+/* أرقام الضغطات جنب كل لينك في اللوحة (مبتظهرش للزوار) */
+function cntEl(id) {
+  if (!statsData) return null;
+  const x = (statsData.links || []).find(k => k.link_id === id);
+  return h('span', { class: 'cnt', title: 'عدد الأشخاص المختلفين · عدد الضغطات' }, (x ? +x.people : 0) + ' ناس · ' + (x ? +x.clicks : 0) + ' ضغطة');
+}
+function paintStrip() {
+  const el = $('#linksStat'); if (!el) return; el.innerHTML = '';
+  const ok = SB_RE.test(cfg.analytics.url || '') && cfg.analytics.key && stat.secret;
+  if (!ok) { el.append(h('div', { class: 'note' }, 'عداد الضغطات مش متفعّل. لما تفعّله هتشوف هنا عدد الناس والضغطات جنب كل لينك، وده بيظهر ليك بس ومبيظهرش للزوار. ', ctlBtn('إعداد العداد', () => showTab('p-stats')))); return; }
+  const d = statsData;
+  el.append(h('div', { class: 'strip' },
+    h('span', { class: 'grow' }, d ? ('زوار الصفحة: ' + (+d.visitors || 0) + ' · ناس ضغطت: ' + (+d.clickers || 0) + ' · ضغطات: ' + (+d.clicks || 0)) : 'الأرقام مش متاحة دلوقتي.'),
+    field('الفترة', stat, 'days', { type: 'select', options: PERIODS, on: () => { saveStat(); autoStats(true); } }),
+    ctlBtn('تحديث', () => autoStats(true), 'pri')));
+}
+function paintCounts() { buildLinks(); buildSocials(); paintStrip(); }
+async function autoStats(manual) {
+  const ok = SB_RE.test(cfg.analytics.url || '') && cfg.analytics.key && stat.secret;
+  if (!ok) { statsData = null; paintStrip(); return; }
+  const res = await getStats();
+  if (res.d) { statsData = res.d; } else { statsData = null; if (manual) toast(res.msg); }
+  paintCounts();
+}
+
+async function loadStats() {
+  const out = $('#statsOut'); out.innerHTML = '';
+  out.append(h('p', { class: 'mut' }, 'جاري التحميل...'));
+  const res = await getStats();
+  out.innerHTML = '';
+  if (res.msg) { out.append(h('p', { class: 'mut' }, res.msg)); return; }
+  const d = res.d;
+  statsData = d; paintCounts();
+  const visitors = +d.visitors || 0, clickers = +d.clickers || 0, clicks = +d.clicks || 0;
+  const rate = visitors ? Math.round(clickers / visitors * 100) : 0;
+  const card = (n, l) => h('div', { class: 'sc' }, h('b', {}, String(n)), h('small', {}, l));
+  out.append(h('div', { class: 'cards' },
+    card(visitors, 'زوار الصفحة'), card(clickers, 'ناس ضغطت على لينكات'), card(clicks, 'إجمالي الضغطات'), card(rate + '%', 'نسبة الضغط')));
+
+  /* كل لينك على حدة، حتى اللي ضغطاته صفر */
+  const map = new Map((d.links || []).map(x => [x.link_id, x]));
+  const rows = [];
+  cfg.links.filter(l => l.type !== 'heading').forEach(l => {
+    const x = map.get(l.id); map.delete(l.id);
+    rows.push({ name: l.title || 'لينك', people: x ? +x.people : 0, clicks: x ? +x.clicks : 0 });
+  });
+  map.forEach(x => rows.push({ name: nameOf(x.link_id, x.label), people: +x.people, clicks: +x.clicks }));
+  rows.sort((p, q) => q.clicks - p.clicks);
+  const max = Math.max(1, ...rows.map(r => r.clicks));
+  const tbody = h('tbody', {}, rows.map(r => h('tr', {},
+    h('td', {}, r.name),
+    h('td', { class: 'n' }, String(r.people)),
+    h('td', { class: 'n' }, String(r.clicks)),
+    h('td', {}, h('div', { class: 'bar' }, h('i', { style: `width:${Math.round(r.clicks / max * 100)}%` }))))));
+  out.append(h('div', { class: 'tbl-wrap' }, h('table', { class: 'tbl' },
+    h('thead', {}, h('tr', {}, h('th', {}, 'اللينك'), h('th', {}, 'ناس'), h('th', {}, 'ضغطات'), h('th', {}, ''))), tbody)));
+  out.append(h('p', { class: 'mut', style: 'margin-top:8px' }, '"ناس" هو عدد الأشخاص المختلفين، و"ضغطات" بتحسب الشخص مرة واحدة كل ساعة على نفس اللينك.'));
+
+  const days = (d.daily || []).slice(-30);
+  if (days.length) {
+    const dm = Math.max(1, ...days.map(x => +x.visitors || 0));
+    out.append(h('h3', { style: 'margin:16px 0 0;font-size:14px' }, 'الزوار يوميًا'),
+      h('div', { class: 'days' }, days.map(x => h('div', { style: `height:${Math.max(3, Math.round((+x.visitors || 0) / dm * 100))}%`, title: x.day + ' — ' + (x.visitors || 0) + ' زائر، ' + (x.clicks || 0) + ' ضغطة' }))));
+  }
+}
+
+function buildStats() {
+  const b = $('#statsBox'); b.innerHTML = '';
+  const a = cfg.analytics;
+  const ign = h('input', { type: 'checkbox' });
+  try { ign.checked = localStorage.getItem('sz_ignore') === '1'; } catch (e) { }
+  ign.onchange = () => { try { ign.checked ? localStorage.setItem('sz_ignore', '1') : localStorage.removeItem('sz_ignore'); toast(ign.checked ? 'زياراتك وضغطاتك من الجهاز ده مش هتتحسب' : 'زياراتك هتتحسب تاني'); } catch (e) { } };
+
+  const setup = h('details', { class: 'item' },
+    h('summary', {}, h('span', { class: 't' }, 'إعداد العداد (مرة واحدة)'), h('span', { class: 'tag' }, a.enabled ? 'شغال' : 'مش متفعّل')),
+    h('div', { class: 'body' },
+      h('div', { class: 'note', style: 'margin-top:12px', html:
+        '<b>الخطوات:</b><ol class="how" style="margin-top:6px">' +
+        '<li>اعمل حساب مجاني على <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a> وأنشئ مشروع جديد (New project).</li>' +
+        '<li>اكتب باسورد للإحصائيات في الخانة اللي تحت (من اختيارك، ومش نفس باسورد قاعدة البيانات).</li>' +
+        '<li>اضغط <b>نسخ كود SQL</b>، وافتح <b>SQL Editor</b> في Supabase، والصقه واضغط <b>Run</b>.</li>' +
+        '<li>افتح <b>Project Settings</b> ثم <b>API Keys</b>، وانسخ <b>Project URL</b> والمفتاح <b>Publishable</b> (أو anon) والصقهم تحت.</li>' +
+        '<li>فعّل العداد، واضغط <b>نشر على الموقع</b>.</li></ol>' }),
+      field('باسورد الإحصائيات', stat, 'secret', { type: 'password', on: saveStat, hint: 'بيتخزن في متصفحك بس. أي حد يعرفه يقدر يشوف الأرقام، فمتبعتوش.' }),
+      h('div', { class: 'add', style: 'margin-bottom:12px' }, ctlBtn('نسخ كود SQL', copySQL, 'pri')),
+      field('Project URL', a, 'url', { ph: 'https://xxxx.supabase.co' }),
+      field('Publishable / anon key', a, 'key', { ph: 'sb_publishable_... أو eyJ...', hint: 'المفتاح ده معمول يبقى علني، ومش بيسمح بقراءة الأرقام من غير الباسورد.' }),
+      field('تفعيل العداد على الصفحة', a, 'enabled', { type: 'checkbox', on: () => { setup.querySelector('.tag').textContent = a.enabled ? 'شغال' : 'مش متفعّل'; } }),
+      h('label', { class: 'f chk' }, ign, h('span', {}, 'متحسبش زياراتي وضغطاتي من الجهاز ده'))));
+  if (!(a.url && a.key)) setup.open = true;
+
+  const period = field('الفترة', stat, 'days', { type: 'select', options: PERIODS, on: () => { saveStat(); loadStats(); } });
+  b.append(setup,
+    h('div', { class: 'group' }, h('h3', {}, 'النتائج'), period,
+      h('div', { class: 'add', style: 'margin-bottom:14px' }, ctlBtn('تحديث الأرقام', loadStats, 'pri')),
+      h('div', { id: 'statsOut' }, h('p', { class: 'mut' }, 'اضغط "تحديث الأرقام" عشان تشوف الإحصائيات.'))),
+    h('div', { class: 'note' }, 'الضغطات الوهمية بتتفلتر: البوتات مبتتحسبش، والشخص بيتحسب مرة كل ساعة على نفس اللينك، وضغطات الأدوات الآلية مبتتحسبش. وأنت تقدر تستثني جهازك من الخيار اللي فوق.'));
+}
+
+function buildSocialOpts() {
+  const b = $('#socialsOpts'); if (!b) return; b.innerHTML = '';
+  const t = cfg.theme;
+  b.append(h('div', { class: 'group' }, h('h3', {}, 'شكل ومكان الأيقونات'),
+    field('مكان الأيقونات', t, 'socialPos', { type: 'select', options: [['bottom', 'تحت اللينكات'], ['top', 'فوق اللينكات (تحت الوصف)']] }),
+    field('شكل الأيقونات', t, 'socialStyle', { type: 'select', options: [['plain', 'أيقونة بس'], ['circle', 'دايرة ملونة'], ['ring', 'دايرة بإطار']] }),
+    field('حجم الأيقونات', t, 'socialSize', { type: 'range', min: 22, max: 44, unit: 'px' })));
+}
+
 function buildAll() {
-  buildBrand(); buildSocials(); buildOffers(); buildLinks(); buildTrack();
+  buildBrand(); buildStyle(); buildSocials(); buildSocialOpts(); buildOffers(); buildLinks(); buildStats(); paintStrip(); buildTrack();
 }
 
 /* ---------- أزرار ---------- */
@@ -514,6 +938,7 @@ $('#btnClose').onclick = () => $('#prev').classList.remove('open');
   try { draft = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { }
   if (draft) { cfg = norm(draft); buildAll(); $('#draftState').textContent = 'مسودة محفوظة في المتصفح'; }
   else { if (!(await loadPublished(true))) { cfg = norm(DEFAULT); buildAll(); } }
+  autoStats();
 })();
 </script>
 </body>
