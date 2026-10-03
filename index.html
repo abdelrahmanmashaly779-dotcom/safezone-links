@@ -75,7 +75,7 @@ a:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .head p{font-size:16px;font-weight:var(--wb);line-height:1.7;margin:6px auto 0;max-width:340px;opacity:.96;white-space:pre-line}
 
 /* السوشيال */
-.socials{display:flex;justify-content:center;flex-wrap:wrap;gap:20px;margin-top:18px}
+.socials{display:flex;justify-content:center;flex-wrap:wrap;gap:var(--sg,20px);margin-top:18px;transform:translate(var(--sx,0px),var(--sy,0px))}
 .socials.bottom{margin-top:26px}
 .socials a{display:block;width:var(--ss);height:var(--ss);transition:transform .15s}
 .socials a:hover{transform:scale(1.12)}
@@ -168,6 +168,30 @@ body[data-en=zoom] .cw{animation-name:enZoom}
 @keyframes enSlide{from{opacity:0;transform:translateX(-44px)}to{opacity:1;transform:none}}
 @keyframes enZoom{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
 
+/* أوراق الشجر وتأثيرات الخلفية الإضافية */
+.fxl{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1}
+.fxl>*{position:absolute}
+.lf{top:-60px;animation:lfFall linear infinite}
+.lf svg{display:block;width:100%;height:100%;animation:lfSway ease-in-out infinite alternate}
+.pf{top:-30px;border-radius:50%;background:#fff;animation:pfFall linear infinite}
+.rn{top:-40px;width:1.5px;background:linear-gradient(transparent,rgba(255,255,255,.75));animation:rnFall linear infinite}
+.st{border-radius:50%;background:#fff;box-shadow:0 0 6px 1px rgba(255,255,255,.8);animation:stTw ease-in-out infinite}
+.ff{border-radius:50%;background:radial-gradient(circle,#fffbb0 0%,rgba(255,240,120,.55) 40%,transparent 70%);animation:ffFly ease-in-out infinite,ffBlink ease-in-out infinite}
+.cf{top:-20px;border-radius:2px;animation:cfFall linear infinite}
+.au{border-radius:50%;filter:blur(60px);mix-blend-mode:screen;animation:auMove ease-in-out infinite alternate}
+.wv{left:0;width:100%;height:90px;background-repeat:repeat-x;background-size:1200px 100%;animation:wvMove linear infinite}
+@keyframes lfFall{from{transform:translate3d(0,-8vh,0)}to{transform:translate3d(var(--dx,0px),112vh,0)}}
+@keyframes lfSway{from{transform:translateX(-26px) rotate(-35deg)}to{transform:translateX(26px) rotate(40deg)}}
+@keyframes pfFall{from{transform:translate3d(0,-6vh,0)}to{transform:translate3d(var(--dx,20px),110vh,0)}}
+@keyframes rnFall{from{transform:translate3d(0,-10vh,0) rotate(12deg)}to{transform:translate3d(-30px,112vh,0) rotate(12deg)}}
+@keyframes stTw{0%,100%{opacity:.15;transform:scale(.6)}50%{opacity:1;transform:scale(1.15)}}
+@keyframes ffFly{0%,100%{transform:translate(0,0)}25%{transform:translate(var(--x1),var(--y1))}50%{transform:translate(var(--x2),var(--y2))}75%{transform:translate(var(--x3),var(--y3))}}
+@keyframes ffBlink{0%,100%{opacity:.15}50%{opacity:1}}
+@keyframes cfFall{from{transform:translate3d(0,-6vh,0) rotate(0)}to{transform:translate3d(var(--dx,30px),110vh,0) rotate(720deg)}}
+@keyframes auMove{from{transform:translate(-8vw,-4vh) scale(1)}to{transform:translate(10vw,8vh) scale(1.25)}}
+@keyframes wvMove{from{background-position-x:0}to{background-position-x:1200px}}
+@media (prefers-reduced-motion:reduce){.fxl{display:none}}
+
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -175,6 +199,8 @@ body[data-en=zoom] .cw{animation-name:enZoom}
 <div class="bg" id="bg"></div>
 <div class="ov" id="ov"></div>
 <div class="fx" id="fx"></div>
+<div class="fxl" id="lv"></div>
+<div class="fxl" id="fx2"></div>
 <main class="wrap" id="app"></main>
 
 <script>
@@ -193,7 +219,9 @@ const THEME_DEFAULT = {
   btnShadow: 'soft', btnShadowColor: '#000000', btnHover: 'lift', btnEnter: 'fade', btnHighlight: 'pulse',
   logoShape: 'circle', logoSize: '112', logoRing: '0', logoAnim: 'none', logoBg: 'white', logoBgColor: '#ffffff',
   socialStyle: 'plain', socialSize: '30', socialPos: 'bottom',
-  wHead: '800', wBody: '600', fontName: 'DIN Next Arabic', fontFiles: []
+  wHead: '800', wBody: '600', fontName: 'DIN Next Arabic', fontFiles: [],
+  leavesOn: false, leavesOpacity: '70', leavesSpeed: '5', leavesCount: '22', leavesSize: '26', leavesPalette: 'green',
+  bgFx: 'none', fxOpacity: '60', fxSpeed: '5', socialX: '0', socialY: '0', socialGap: '20'
 };
 
 const DEFAULT = {
@@ -308,7 +336,6 @@ function sbTrack(kind, linkId, label) {
 }
 function setupAnalytics(a) {
   AN = a || { enabled: false };
-  if (AN.enabled && !viewSent && !PREVIEW) { viewSent = true; setTimeout(() => { if (document.visibilityState === 'visible') sbTrack('view'); }, 1500); }
 }
 
 /* ---------- البيكسل ---------- */
@@ -360,6 +387,55 @@ function applyFont(T) {
   if (FONTS[fam]) loadFont(fam);
   return fam;
 }
+/* ---------- أوراق الشجر + تأثيرات الخلفية الإضافية ---------- */
+const PALETTES = { green: ['#1b5e20', '#2e7d32', '#43a047', '#66bb6a', '#81c784'], autumn: ['#bf360c', '#e65100', '#ef6c00', '#f9a825', '#8d6e63'] };
+const LEAF_SVG = c => `<svg viewBox="0 0 24 24" style="color:${c}"><path fill="currentColor" d="M12 2C6 7 4 11 4 15a8 8 0 0 0 16 0c0-4-2-8-8-13z"/><path d="M12 7v15" stroke="rgba(0,0,0,.28)" stroke-width="1.2" fill="none"/></svg>`;
+const WAVE = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60 Q150 10 300 60 T600 60 T900 60 T1200 60 V120 H0Z" fill="#ffffff"/></svg>');
+const FXS = ['snow', 'stars', 'rain', 'fireflies', 'confetti', 'aurora', 'waves'];
+const R = (a, b) => a + Math.random() * (b - a);
+
+function buildLeaves(T) {
+  const el = document.getElementById('lv');
+  const on = T.leavesOn === true || T.leavesOn === 'true' || T.leavesOn === '1';
+  if (!on) { el.innerHTML = ''; el.dataset.k = ''; return; }
+  const speed = NUM(T.leavesSpeed, 5, 1, 10), count = Math.round(NUM(T.leavesCount, 22, 3, 80)), size = NUM(T.leavesSize, 26, 10, 80);
+  const pal = PICK(T.leavesPalette, ['green', 'autumn', 'mixed'], 'green');
+  el.style.opacity = NUM(T.leavesOpacity, 70, 0, 100) / 100;
+  const key = [speed, count, size, pal].join('|');
+  if (el.dataset.k === key && el.children.length) return;
+  el.dataset.k = key; el.innerHTML = '';
+  const colors = pal === 'mixed' ? [...PALETTES.green, ...PALETTES.autumn] : PALETTES[pal];
+  const k = 6 / speed;
+  for (let i = 0; i < count; i++) {
+    const w = size * (0.6 + Math.random() * 0.7), dur = R(9, 16) * k;
+    const d = h('div', { class: 'lf', html: LEAF_SVG(colors[i % colors.length]) });
+    d.style.cssText = `left:${R(0, 100).toFixed(1)}%;width:${w.toFixed(1)}px;height:${w.toFixed(1)}px;--dx:${R(-80, 80).toFixed(0)}px;animation-duration:${dur.toFixed(2)}s;animation-delay:${(-R(0, dur)).toFixed(2)}s`;
+    d.firstChild.style.animationDuration = R(2.4, 4.8).toFixed(2) + 's';
+    d.firstChild.style.animationDelay = (-R(0, 3)).toFixed(2) + 's';
+    el.append(d);
+  }
+}
+
+function buildFx(T) {
+  const el = document.getElementById('fx2');
+  const kind = PICK(T.bgFx, FXS, '');
+  if (!kind) { el.innerHTML = ''; el.dataset.k = ''; return; }
+  const speed = NUM(T.fxSpeed, 5, 1, 10), k = 6 / speed;
+  el.style.opacity = NUM(T.fxOpacity, 60, 0, 100) / 100;
+  const key = kind + '|' + speed;
+  if (el.dataset.k === key && el.children.length) return;
+  el.dataset.k = key; el.innerHTML = '';
+  const add = (cls, css) => { const s = document.createElement('span'); s.className = cls; s.style.cssText = css; el.append(s); return s; };
+  const f = n => n.toFixed(2);
+  if (kind === 'snow') for (let i = 0; i < 70; i++) { const z = R(2, 6), d = R(8, 16) * k; add('pf', `left:${f(R(0, 100))}%;width:${f(z)}px;height:${f(z)}px;opacity:${f(R(.4, 1))};--dx:${R(-40, 40).toFixed(0)}px;animation-duration:${f(d)}s;animation-delay:${f(-R(0, d))}s`); }
+  if (kind === 'rain') for (let i = 0; i < 60; i++) { const d = R(.7, 1.3) * k; add('rn', `left:${f(R(0, 100))}%;height:${f(R(14, 28))}px;opacity:${f(R(.3, .9))};animation-duration:${f(d)}s;animation-delay:${f(-R(0, d))}s`); }
+  if (kind === 'stars') for (let i = 0; i < 55; i++) { const z = R(1.5, 4); add('st', `left:${f(R(0, 100))}%;top:${f(R(0, 100))}%;width:${f(z)}px;height:${f(z)}px;animation-duration:${f(R(2, 5) * k)}s;animation-delay:${f(-R(0, 5))}s`); }
+  if (kind === 'fireflies') for (let i = 0; i < 22; i++) { const z = R(6, 12), o = () => R(-110, 110).toFixed(0) + 'px'; add('ff', `left:${f(R(0, 100))}%;top:${f(R(5, 95))}%;width:${f(z)}px;height:${f(z)}px;--x1:${o()};--y1:${o()};--x2:${o()};--y2:${o()};--x3:${o()};--y3:${o()};animation-duration:${f(R(10, 20) * k)}s,${f(R(2.5, 5) * k)}s;animation-delay:${f(-R(0, 10))}s,${f(-R(0, 4))}s`); }
+  if (kind === 'confetti') { const cs = ['#ff5252', '#ffd740', '#40c4ff', '#69f0ae', '#e040fb', '#ffffff']; for (let i = 0; i < 45; i++) { const d = R(7, 14) * k; add('cf', `left:${f(R(0, 100))}%;width:${f(R(6, 10))}px;height:${f(R(10, 16))}px;background:${cs[i % cs.length]};--dx:${R(-80, 80).toFixed(0)}px;animation-duration:${f(d)}s;animation-delay:${f(-R(0, d))}s`); } }
+  if (kind === 'aurora') { const cs = ['rgba(124,245,200,.9)', 'rgba(122,168,255,.9)', 'rgba(213,124,255,.85)']; cs.forEach((c, i) => add('au', `width:60vw;height:60vw;left:${[-10, 30, 55][i]}vw;top:${[-10, 20, 40][i]}vh;background:radial-gradient(circle,${c},transparent 65%);animation-duration:${f(R(14, 22) * k)}s;animation-delay:${f(-R(0, 8))}s`)); }
+  if (kind === 'waves') [[14, .3], [10, .2], [7, .14]].forEach(([d, o], i) => add('wv', `bottom:${i * 14}px;background-image:url("${WAVE}");opacity:${o};animation-duration:${f(d * k)}s;animation-direction:${i === 1 ? 'reverse' : 'normal'}`));
+}
+
 function applyTheme(t0) {
   const T = { ...THEME_DEFAULT, ...t0 };
   const st = document.documentElement.style, body = document.body;
@@ -380,6 +456,7 @@ function applyTheme(t0) {
     '--logo': NUM(T.logoSize, 112, 60, 220) + 'px', '--ring': NUM(T.logoRing, 0, 0, 12) + 'px',
     '--logoR': { circle: '50%', rounded: '24%', square: '8px' }[T.logoShape] || '50%',
     '--ss': NUM(T.socialSize, 30, 20, 56) + 'px',
+    '--sx': NUM(T.socialX, 0, -300, 300) + 'px', '--sy': NUM(T.socialY, 0, -300, 300) + 'px', '--sg': NUM(T.socialGap, 20, 0, 80) + 'px',
     '--wh': NUM(T.wHead, 800, 100, 900), '--wb': NUM(T.wBody, 600, 100, 900),
     '--logoBg': T.logoBg === 'color' ? COL(T.logoBgColor, '#ffffff') : '#ffffff'
   };
@@ -422,6 +499,7 @@ function applyTheme(t0) {
       }
     }
   } else fx.innerHTML = '';
+  buildLeaves(T); buildFx(T);
   return T;
 }
 

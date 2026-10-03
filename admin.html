@@ -103,6 +103,7 @@ code{background:#eef3ee;border-radius:6px;padding:1px 6px;font-size:13px;directi
 .strip{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;background:#f3f8f3;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-weight:700;font-size:14px}
 .strip .f{margin:0;min-width:140px}
 .strip .grow{flex:1}
+.f input[type=number]{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#17211a;color:#fff;padding:10px 18px;border-radius:99px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
 .toast.on{opacity:1}
 
@@ -167,11 +168,12 @@ code{background:#eef3ee;border-radius:6px;padding:1px 6px;font-size:13px;directi
         <button class="btn pri" id="addLink">+ لينك جديد</button>
         <button class="btn" id="addHeading">+ عنوان قسم</button>
       </div>
+      <div id="linksTotal"></div>
     </section>
 
         <section class="panel" id="p-stats" data-title="الإحصائيات">
       <h2>الإحصائيات</h2>
-      <p class="sub">عدد الناس اللي زاروا الصفحة وضغطوا على كل لينك، من غير ضغطات وهمية.</p>
+      <p class="sub">عدد الضغطات على كل لينك وإجمالي الضغطات، من غير ضغطات وهمية.</p>
       <div id="statsBox"></div>
     </section>
 
@@ -226,7 +228,9 @@ const THEME_DEFAULT = {
   btnShadow: 'soft', btnShadowColor: '#000000', btnHover: 'lift', btnEnter: 'fade', btnHighlight: 'pulse',
   logoShape: 'circle', logoSize: '112', logoRing: '0', logoAnim: 'none', logoBg: 'white', logoBgColor: '#ffffff',
   socialStyle: 'plain', socialSize: '30', socialPos: 'bottom',
-  wHead: '800', wBody: '600', fontName: 'DIN Next Arabic', fontFiles: []
+  wHead: '800', wBody: '600', fontName: 'DIN Next Arabic', fontFiles: [],
+  leavesOn: false, leavesOpacity: '70', leavesSpeed: '5', leavesCount: '22', leavesSize: '26', leavesPalette: 'green',
+  bgFx: 'none', fxOpacity: '60', fxSpeed: '5', socialX: '0', socialY: '0', socialGap: '20'
 };
 const DEFAULT = {
   brand: { name: 'Safezonestore', tagline: 'المنتجات المعلن عنها موجودة\nهنا... في السيف زوون', logo: DEFAULT_LOGO },
@@ -281,8 +285,13 @@ function norm(c) {
     pixels: { ...d.pixels, ...c.pixels },
     analytics: { ...d.analytics, ...c.analytics },
     socials: Array.isArray(c.socials) ? c.socials : d.socials,
-    links: Array.isArray(c.links) ? c.links : d.links
+    links: uniqueIds(Array.isArray(c.links) ? c.links : d.links)
   };
+}
+function uniqueIds(list) {
+  const seen = new Set();
+  list.forEach(l => { if (!l.id || seen.has(l.id)) l.id = uid(); seen.add(l.id); });
+  return list;
 }
 function h(tag, attrs = {}, ...kids) {
   const e = document.createElement(tag);
@@ -476,6 +485,22 @@ const WEIGHTS = [['100', '100 - رفيع جدًا'], ['200', '200 - رفيع'], 
 const ANIM_OPTS = [['pulse', 'نبض (حلقة)'], ['heartbeat', 'نبضة قلب'], ['shake', 'اهتزاز'], ['wiggle', 'تمايل'], ['bounce', 'قفز'], ['float', 'طفو'],
   ['glow', 'توهج'], ['flash', 'وميض'], ['shine', 'لمعان بيعدي'], ['swing', 'تأرجح'], ['rubber', 'مطاط'], ['tada', 'تادا'], ['jello', 'جيلي'], ['rainbow', 'حلقة ملونة']];
 
+function numField(label, obj, key, o = {}) {
+  const step = o.step || 1, min = o.min ?? -300, max = o.max ?? 300;
+  const clamp = v => Math.max(min, Math.min(max, Number(v) || 0));
+  const i = h('input', { type: 'number', min, max, step });
+  i.value = obj[key] ?? 0;
+  i.oninput = () => { obj[key] = String(clamp(i.value)); push(); };
+  i.onchange = () => { i.value = clamp(i.value); obj[key] = String(i.value); push(); };
+  const nudge = d => () => { i.value = clamp((Number(i.value) || 0) + d); obj[key] = String(i.value); push(); };
+  return h('div', { class: 'f' },
+    h('span', {}, label + (o.unit ? ' (' + o.unit + ')' : '')),
+    h('div', { style: 'display:flex;gap:6px;align-items:center' }, ctlBtn(o.minus || '−', nudge(-step)), i, ctlBtn(o.plus || '+', nudge(step))),
+    o.hint ? h('small', {}, o.hint) : null);
+}
+const FX_OPTS = [['none', 'بدون'], ['snow', 'ثلج متساقط'], ['stars', 'نجوم بتلمع'], ['rain', 'مطر خفيف'], ['fireflies', 'يراعات مضيئة'], ['confetti', 'قصاصات ملونة'], ['aurora', 'شفق ملون'], ['waves', 'موجات']];
+const KEEP_KEYS = ['leavesOn', 'leavesOpacity', 'leavesSpeed', 'leavesCount', 'leavesSize', 'leavesPalette', 'bgFx', 'fxOpacity', 'fxSpeed', 'socialX', 'socialY', 'socialGap'];
+
 let prevTheme = null;
 function rebuildTheme() { buildStyle(); buildBrand(); buildSocialOpts(); }
 
@@ -542,7 +567,8 @@ function buildStyle() {
     x.onclick = () => {
       const o = clone(cfg.theme); prevTheme = o;
       const keep = o.bgType === 'image' && o.bgImage;
-      cfg.theme = { ...clone(DEFAULT.theme), ...p.t, bgImage: o.bgImage || '', ...(keep ? { bgType: 'image', bgOverlay: o.bgOverlay, bgOverlayColor: o.bgOverlayColor, bgBlur: o.bgBlur, bgAnim: o.bgAnim } : {}) };
+      const keepFx = Object.fromEntries(KEEP_KEYS.filter(k => k in o).map(k => [k, o[k]]));
+      cfg.theme = { ...clone(DEFAULT.theme), ...p.t, bgImage: o.bgImage || '', ...(keep ? { bgType: 'image', bgOverlay: o.bgOverlay, bgOverlayColor: o.bgOverlayColor, bgBlur: o.bgBlur, bgAnim: o.bgAnim } : {}), ...keepFx };
       rebuildTheme(); push(); toast('اتطبّق قالب: ' + p.name);
     };
     return x;
@@ -571,6 +597,20 @@ function buildStyle() {
       field('زاوية التدرج', t, 'bgAngle', { type: 'range', min: 0, max: 360, step: 5, unit: '°' }),
       sel('حركة الخلفية', 'bgAnim', [['none', 'بدون'], ['shift', 'تدرج متحرك'], ['bubbles', 'فقاعات طايرة']]));
   }
+
+  /* أوراق الشجر + تأثيرات الخلفية الإضافية */
+  const leafKids = [
+    field('تفعيل أوراق الشجر المتساقطة', t, 'leavesOn', { type: 'checkbox' }),
+    field('الشفافية (أقل = أشفّ)', t, 'leavesOpacity', { type: 'range', min: 5, max: 100, unit: '%' }),
+    field('السرعة (رقم أكبر = أسرع)', t, 'leavesSpeed', { type: 'range', min: 1, max: 10 }),
+    field('عدد الأوراق', t, 'leavesCount', { type: 'range', min: 5, max: 60 }),
+    field('حجم الورقة', t, 'leavesSize', { type: 'range', min: 12, max: 60, unit: 'px' }),
+    sel('ألوان الأوراق', 'leavesPalette', [['green', 'أخضر'], ['autumn', 'خريفي'], ['mixed', 'مختلط']])];
+  const bgFxKids = [
+    sel('التأثير', 'bgFx', FX_OPTS),
+    field('الشفافية', t, 'fxOpacity', { type: 'range', min: 5, max: 100, unit: '%' }),
+    field('السرعة (رقم أكبر = أسرع)', t, 'fxSpeed', { type: 'range', min: 1, max: 10 }),
+    h('small', { style: 'color:var(--mut);display:block;margin-top:-4px' }, 'التأثير ده بيشتغل مع حركة الخلفية الأساسية وأوراق الشجر في نفس الوقت، ومبيغيّرش أي إعداد تاني.')];
 
   /* الأزرار */
   const btnKids = [
@@ -614,6 +654,8 @@ function buildStyle() {
   b.append(
     grp('قوالب جاهزة', presets, prevTheme ? h('div', { class: 'add' }, ctlBtn('↩ تراجع عن القالب', () => { cfg.theme = prevTheme; prevTheme = null; rebuildTheme(); push(); toast('اتلغى القالب ورجعت إعداداتك'); })) : null, h('small', { style: 'color:var(--mut);display:block;margin-top:8px' }, 'القالب بيغيّر ألوان وشكل الأزرار والحركات ولون الكتابة والخط، لكن بيحتفظ بصورة الخلفية لو كانت شغالة. لو مش عاجبك اضغط تراجع.')),
     grp('الخلفية', ...bgKids),
+    grp('أوراق الشجر المتساقطة', ...leafKids),
+    grp('تأثيرات إضافية للخلفية', ...bgFxKids),
     grp('الأزرار', ...btnKids),
     grp('الظلال والحركات', ...fxKids),
     grp('الخط والأوزان', ...fontKids),
@@ -727,17 +769,19 @@ async function getStats() {
 function cntEl(id) {
   if (!statsData) return null;
   const x = (statsData.links || []).find(k => k.link_id === id);
-  return h('span', { class: 'cnt', title: 'عدد الأشخاص المختلفين · عدد الضغطات' }, (x ? +x.people : 0) + ' ناس · ' + (x ? +x.clicks : 0) + ' ضغطة');
+  return h('span', { class: 'cnt', title: 'عدد الضغطات' }, (x ? +x.clicks || 0 : 0) + ' ضغطة');
 }
 function paintStrip() {
-  const el = $('#linksStat'); if (!el) return; el.innerHTML = '';
+  const el = $('#linksStat'), tot = $('#linksTotal'); if (!el) return;
+  el.innerHTML = ''; if (tot) tot.innerHTML = '';
   const ok = SB_RE.test(cfg.analytics.url || '') && cfg.analytics.key && stat.secret;
-  if (!ok) { el.append(h('div', { class: 'note' }, 'عداد الضغطات مش متفعّل. لما تفعّله هتشوف هنا عدد الناس والضغطات جنب كل لينك، وده بيظهر ليك بس ومبيظهرش للزوار. ', ctlBtn('إعداد العداد', () => showTab('p-stats')))); return; }
-  const d = statsData;
+  if (!ok) { el.append(h('div', { class: 'note' }, 'عداد الضغطات مش متفعّل. لما تفعّله هتشوف هنا عدد الضغطات جنب كل لينك، وده بيظهر ليك بس ومبيظهرش للزوار. ', ctlBtn('إعداد العداد', () => showTab('p-stats')))); return; }
   el.append(h('div', { class: 'strip' },
-    h('span', { class: 'grow' }, d ? ('زوار الصفحة: ' + (+d.visitors || 0) + ' · ناس ضغطت: ' + (+d.clickers || 0) + ' · ضغطات: ' + (+d.clicks || 0)) : 'الأرقام مش متاحة دلوقتي.'),
+    h('span', { class: 'grow' }, statsData ? 'عدد الضغطات على كل لينك' : 'الأرقام مش متاحة دلوقتي.'),
     field('الفترة', stat, 'days', { type: 'select', options: PERIODS, on: () => { saveStat(); autoStats(true); } }),
     ctlBtn('تحديث', () => autoStats(true), 'pri')));
+  if (tot && statsData) tot.append(h('div', { class: 'strip', style: 'margin-top:12px' },
+    h('span', { class: 'grow' }, 'إجمالي الضغطات'), h('b', { style: 'font-size:22px' }, String(+statsData.clicks || 0))));
 }
 function paintCounts() { buildLinks(); buildSocials(); paintStrip(); }
 async function autoStats(manual) {
@@ -756,36 +800,32 @@ async function loadStats() {
   if (res.msg) { out.append(h('p', { class: 'mut' }, res.msg)); return; }
   const d = res.d;
   statsData = d; paintCounts();
-  const visitors = +d.visitors || 0, clickers = +d.clickers || 0, clicks = +d.clicks || 0;
-  const rate = visitors ? Math.round(clickers / visitors * 100) : 0;
-  const card = (n, l) => h('div', { class: 'sc' }, h('b', {}, String(n)), h('small', {}, l));
-  out.append(h('div', { class: 'cards' },
-    card(visitors, 'زوار الصفحة'), card(clickers, 'ناس ضغطت على لينكات'), card(clicks, 'إجمالي الضغطات'), card(rate + '%', 'نسبة الضغط')));
 
   /* كل لينك على حدة، حتى اللي ضغطاته صفر */
   const map = new Map((d.links || []).map(x => [x.link_id, x]));
   const rows = [];
   cfg.links.filter(l => l.type !== 'heading').forEach(l => {
     const x = map.get(l.id); map.delete(l.id);
-    rows.push({ name: l.title || 'لينك', people: x ? +x.people : 0, clicks: x ? +x.clicks : 0 });
+    rows.push({ name: l.title || 'لينك', clicks: x ? +x.clicks : 0 });
   });
-  map.forEach(x => rows.push({ name: nameOf(x.link_id, x.label), people: +x.people, clicks: +x.clicks }));
+  map.forEach(x => rows.push({ name: nameOf(x.link_id, x.label), clicks: +x.clicks }));
   rows.sort((p, q) => q.clicks - p.clicks);
   const max = Math.max(1, ...rows.map(r => r.clicks));
   const tbody = h('tbody', {}, rows.map(r => h('tr', {},
     h('td', {}, r.name),
-    h('td', { class: 'n' }, String(r.people)),
     h('td', { class: 'n' }, String(r.clicks)),
     h('td', {}, h('div', { class: 'bar' }, h('i', { style: `width:${Math.round(r.clicks / max * 100)}%` }))))));
   out.append(h('div', { class: 'tbl-wrap' }, h('table', { class: 'tbl' },
-    h('thead', {}, h('tr', {}, h('th', {}, 'اللينك'), h('th', {}, 'ناس'), h('th', {}, 'ضغطات'), h('th', {}, ''))), tbody)));
-  out.append(h('p', { class: 'mut', style: 'margin-top:8px' }, '"ناس" هو عدد الأشخاص المختلفين، و"ضغطات" بتحسب الشخص مرة واحدة كل ساعة على نفس اللينك.'));
+    h('thead', {}, h('tr', {}, h('th', {}, 'اللينك'), h('th', {}, 'ضغطات'), h('th', {}, ''))), tbody)));
+  out.append(h('div', { class: 'strip', style: 'margin-top:12px' },
+    h('span', { class: 'grow' }, 'إجمالي الضغطات'), h('b', { style: 'font-size:22px' }, String(+d.clicks || 0))));
+  out.append(h('p', { class: 'mut', style: 'margin-top:8px' }, 'الشخص بيتحسب مرة واحدة كل ساعة على نفس اللينك، عشان الضغطات تبقى حقيقية.'));
 
   const days = (d.daily || []).slice(-30);
   if (days.length) {
-    const dm = Math.max(1, ...days.map(x => +x.visitors || 0));
-    out.append(h('h3', { style: 'margin:16px 0 0;font-size:14px' }, 'الزوار يوميًا'),
-      h('div', { class: 'days' }, days.map(x => h('div', { style: `height:${Math.max(3, Math.round((+x.visitors || 0) / dm * 100))}%`, title: x.day + ' — ' + (x.visitors || 0) + ' زائر، ' + (x.clicks || 0) + ' ضغطة' }))));
+    const dm = Math.max(1, ...days.map(x => +x.clicks || 0));
+    out.append(h('h3', { style: 'margin:16px 0 0;font-size:14px' }, 'الضغطات يوميًا'),
+      h('div', { class: 'days' }, days.map(x => h('div', { style: `height:${Math.max(3, Math.round((+x.clicks || 0) / dm * 100))}%`, title: x.day + ' — ' + (x.clicks || 0) + ' ضغطة' }))));
   }
 }
 
@@ -819,7 +859,7 @@ function buildStats() {
     h('div', { class: 'group' }, h('h3', {}, 'النتائج'), period,
       h('div', { class: 'add', style: 'margin-bottom:14px' }, ctlBtn('تحديث الأرقام', loadStats, 'pri')),
       h('div', { id: 'statsOut' }, h('p', { class: 'mut' }, 'اضغط "تحديث الأرقام" عشان تشوف الإحصائيات.'))),
-    h('div', { class: 'note' }, 'الضغطات الوهمية بتتفلتر: البوتات مبتتحسبش، والشخص بيتحسب مرة كل ساعة على نفس اللينك، وضغطات الأدوات الآلية مبتتحسبش. وأنت تقدر تستثني جهازك من الخيار اللي فوق.'));
+    h('div', { class: 'note' }, 'الضغطات الوهمية بتتفلتر: البوتات مبتتحسبش، والضغطة بتتحسب مرة كل ساعة لكل شخص على نفس اللينك، وضغطات الأدوات الآلية مبتتحسبش. وأنت تقدر تستثني جهازك من الخيار اللي فوق.'));
 }
 
 function buildSocialOpts() {
@@ -828,7 +868,10 @@ function buildSocialOpts() {
   b.append(h('div', { class: 'group' }, h('h3', {}, 'شكل ومكان الأيقونات'),
     field('مكان الأيقونات', t, 'socialPos', { type: 'select', options: [['bottom', 'تحت اللينكات'], ['top', 'فوق اللينكات (تحت الوصف)']] }),
     field('شكل الأيقونات', t, 'socialStyle', { type: 'select', options: [['plain', 'أيقونة بس'], ['circle', 'دايرة ملونة'], ['ring', 'دايرة بإطار']] }),
-    field('حجم الأيقونات', t, 'socialSize', { type: 'range', min: 22, max: 44, unit: 'px' })));
+    field('حجم الأيقونات', t, 'socialSize', { type: 'range', min: 22, max: 44, unit: 'px' }),
+    numField('رفع / نزول الأيقونات', t, 'socialY', { min: -200, max: 200, step: 2, unit: 'px', minus: '▲ ارفع', plus: '▼ نزّل', hint: 'اكتب رقم أو استخدم الأزرار. رقم سالب بيرفع الأيقونات لفوق، وموجب بينزلها لتحت.' }),
+    numField('يمين / شمال', t, 'socialX', { min: -200, max: 200, step: 2, unit: 'px', minus: '◀ شمال', plus: 'يمين ▶', hint: 'رقم موجب لليمين، وسالب للشمال.' }),
+    numField('المسافة بين الأيقونات', t, 'socialGap', { min: 0, max: 80, step: 2, unit: 'px' })));
 }
 
 function buildAll() {
