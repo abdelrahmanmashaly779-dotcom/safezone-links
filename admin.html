@@ -230,6 +230,7 @@ const THEME_DEFAULT = {
   socialStyle: 'plain', socialSize: '30', socialPos: 'bottom',
   wHead: '800', wBody: '600', fontName: 'DIN Next Arabic', fontFiles: [],
   leavesOn: false, leavesOpacity: '70', leavesSpeed: '5', leavesCount: '22', leavesSize: '26', leavesPalette: 'green',
+  leavesGround: true, leavesGroundY: '90', leavesGroundDepth: '6', leavesRest: '6',
   bgFx: 'none', fxOpacity: '60', fxSpeed: '5', socialX: '0', socialY: '0', socialGap: '20'
 };
 const DEFAULT = {
@@ -499,7 +500,7 @@ function numField(label, obj, key, o = {}) {
     o.hint ? h('small', {}, o.hint) : null);
 }
 const FX_OPTS = [['none', 'بدون'], ['snow', 'ثلج متساقط'], ['stars', 'نجوم بتلمع'], ['rain', 'مطر خفيف'], ['fireflies', 'يراعات مضيئة'], ['confetti', 'قصاصات ملونة'], ['aurora', 'شفق ملون'], ['waves', 'موجات']];
-const KEEP_KEYS = ['leavesOn', 'leavesOpacity', 'leavesSpeed', 'leavesCount', 'leavesSize', 'leavesPalette', 'bgFx', 'fxOpacity', 'fxSpeed', 'socialX', 'socialY', 'socialGap'];
+const KEEP_KEYS = ['leavesOn', 'leavesOpacity', 'leavesSpeed', 'leavesCount', 'leavesSize', 'leavesPalette', 'leavesGround', 'leavesGroundY', 'leavesGroundDepth', 'leavesRest', 'bgFx', 'fxOpacity', 'fxSpeed', 'socialX', 'socialY', 'socialGap'];
 
 let prevTheme = null;
 function rebuildTheme() { buildStyle(); buildBrand(); buildSocialOpts(); }
@@ -605,7 +606,12 @@ function buildStyle() {
     field('السرعة (رقم أكبر = أسرع)', t, 'leavesSpeed', { type: 'range', min: 1, max: 10 }),
     field('عدد الأوراق', t, 'leavesCount', { type: 'range', min: 5, max: 60 }),
     field('حجم الورقة', t, 'leavesSize', { type: 'range', min: 12, max: 60, unit: 'px' }),
-    sel('ألوان الأوراق', 'leavesPalette', [['green', 'أخضر'], ['autumn', 'خريفي'], ['mixed', 'مختلط']])];
+    sel('ألوان الأوراق', 'leavesPalette', [['green', 'أخضر'], ['autumn', 'خريفي'], ['mixed', 'مختلط']]),
+    field('الأوراق تقع وتستقر على أرض الخلفية', t, 'leavesGround', { type: 'checkbox' }),
+    field('مكان الأرض (من فوق الشاشة)', t, 'leavesGroundY', { type: 'range', min: 30, max: 100, unit: '%',
+      hint: 'اسحب لحد ما الخط الأحمر المتقطع في المعاينة يبقى على الأرض في صورة الخلفية. الخط بيظهر في المعاينة بس ومبيظهرش للزوار.' }),
+    field('عمق الأرض (انتشار الأوراق)', t, 'leavesGroundDepth', { type: 'range', min: 0, max: 25, unit: '%' }),
+    field('مدة بقاء الورقة على الأرض', t, 'leavesRest', { type: 'range', min: 0, max: 30, unit: 'ث' })];
   const bgFxKids = [
     sel('التأثير', 'bgFx', FX_OPTS),
     field('الشفافية', t, 'fxOpacity', { type: 'range', min: 5, max: 100, unit: '%' }),

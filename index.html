@@ -191,6 +191,8 @@ body[data-en=zoom] .cw{animation-name:enZoom}
 @keyframes auMove{from{transform:translate(-8vw,-4vh) scale(1)}to{transform:translate(10vw,8vh) scale(1.25)}}
 @keyframes wvMove{from{background-position-x:0}to{background-position-x:1200px}}
 @media (prefers-reduced-motion:reduce){.fxl{display:none}}
+.gline{display:none;position:fixed;left:0;right:0;height:0;border-top:2px dashed rgba(255,60,60,.95);z-index:50;pointer-events:none}
+.gline::after{content:'الأرض (للمعاينة فقط)';position:absolute;top:2px;inset-inline-start:6px;font:700 11px Cairo,sans-serif;color:#fff;background:rgba(220,40,40,.9);padding:1px 8px;border-radius:99px}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
@@ -201,6 +203,7 @@ body[data-en=zoom] .cw{animation-name:enZoom}
 <div class="fx" id="fx"></div>
 <div class="fxl" id="lv"></div>
 <div class="fxl" id="fx2"></div>
+<div class="gline" id="gline"></div>
 <main class="wrap" id="app"></main>
 
 <script>
@@ -221,6 +224,7 @@ const THEME_DEFAULT = {
   socialStyle: 'plain', socialSize: '30', socialPos: 'bottom',
   wHead: '800', wBody: '600', fontName: 'DIN Next Arabic', fontFiles: [],
   leavesOn: false, leavesOpacity: '70', leavesSpeed: '5', leavesCount: '22', leavesSize: '26', leavesPalette: 'green',
+  leavesGround: true, leavesGroundY: '90', leavesGroundDepth: '6', leavesRest: '6',
   bgFx: 'none', fxOpacity: '60', fxSpeed: '5', socialX: '0', socialY: '0', socialGap: '20'
 };
 
@@ -395,26 +399,58 @@ const FXS = ['snow', 'stars', 'rain', 'fireflies', 'confetti', 'aurora', 'waves'
 const R = (a, b) => a + Math.random() * (b - a);
 
 function buildLeaves(T) {
-  const el = document.getElementById('lv');
+  window.__LT = T;
+  const el = document.getElementById('lv'), gl = document.getElementById('gline');
   const on = T.leavesOn === true || T.leavesOn === 'true' || T.leavesOn === '1';
+  const ground = on && !(T.leavesGround === false || T.leavesGround === 'false' || T.leavesGround === '0');
+  if (gl) gl.style.display = 'none';
   if (!on) { el.innerHTML = ''; el.dataset.k = ''; return; }
   const speed = NUM(T.leavesSpeed, 5, 1, 10), count = Math.round(NUM(T.leavesCount, 22, 3, 80)), size = NUM(T.leavesSize, 26, 10, 80);
   const pal = PICK(T.leavesPalette, ['green', 'autumn', 'mixed'], 'green');
+  const gy = NUM(T.leavesGroundY, 90, 20, 100), gd = NUM(T.leavesGroundDepth, 6, 0, 30), rest = NUM(T.leavesRest, 6, 0, 60);
+  const H = el.clientHeight || window.innerHeight || 800;
   el.style.opacity = NUM(T.leavesOpacity, 70, 0, 100) / 100;
-  const key = [speed, count, size, pal].join('|');
+  if (ground && PREVIEW && gl) { gl.style.display = 'block'; gl.style.top = (gy / 100 * H).toFixed(0) + 'px'; }
+  const key = [speed, count, size, pal, ground ? [gy, gd, rest, Math.round(H / 40)].join(',') : 'free'].join('|');
   if (el.dataset.k === key && el.children.length) return;
   el.dataset.k = key; el.innerHTML = '';
+  let kf = document.getElementById('lvKf');
+  if (!kf) { kf = document.createElement('style'); kf.id = 'lvKf'; document.head.append(kf); }
+  kf.textContent = '';
   const colors = pal === 'mixed' ? [...PALETTES.green, ...PALETTES.autumn] : PALETTES[pal];
   const k = 6 / speed;
+  let css = '';
   for (let i = 0; i < count; i++) {
-    const w = size * (0.6 + Math.random() * 0.7), dur = R(9, 16) * k;
+    const w = size * (0.6 + Math.random() * 0.7);
     const d = h('div', { class: 'lf', html: LEAF_SVG(colors[i % colors.length]) });
-    d.style.cssText = `left:${R(0, 100).toFixed(1)}%;width:${w.toFixed(1)}px;height:${w.toFixed(1)}px;--dx:${R(-80, 80).toFixed(0)}px;animation-duration:${dur.toFixed(2)}s;animation-delay:${(-R(0, dur)).toFixed(2)}s`;
-    d.firstChild.style.animationDuration = R(2.4, 4.8).toFixed(2) + 's';
-    d.firstChild.style.animationDelay = (-R(0, 3)).toFixed(2) + 's';
+    const svg = d.firstChild;
+    if (!ground) {
+      const dur = R(9, 16) * k;
+      d.style.cssText = `left:${R(0, 100).toFixed(1)}%;width:${w.toFixed(1)}px;height:${w.toFixed(1)}px;--dx:${R(-80, 80).toFixed(0)}px;animation-duration:${dur.toFixed(2)}s;animation-delay:${(-R(0, dur)).toFixed(2)}s`;
+      svg.style.animationDuration = R(2.4, 4.8).toFixed(2) + 's';
+      svg.style.animationDelay = (-R(0, 3)).toFixed(2) + 's';
+    } else {
+      /* ورقة بتقع، تستقر على الأرض فترة، وبعدين بتختفي وتبدأ من فوق */
+      const fall = R(7, 12) * k, rst = rest * R(0.8, 1.2), fade = 1.5, total = fall + rst + fade;
+      const p1 = (fall / total * 100).toFixed(2), p2 = ((fall + rst) / total * 100).toFixed(2);
+      const landBottom = Math.min(gy / 100 * H + R(0, gd) / 100 * H, H - 2);
+      const ly = (landBottom - w + 60).toFixed(0), dx = R(-80, 80).toFixed(0), start = (-0.08 * H).toFixed(0);
+      css += `@keyframes lg${i}{0%{transform:translate3d(0,${start}px,0);opacity:0}3%{opacity:1}${p1}%{transform:translate3d(${dx}px,${ly}px,0);opacity:1}${p2}%{transform:translate3d(${dx}px,${ly}px,0);opacity:1}100%{transform:translate3d(${dx}px,${ly}px,0);opacity:0}}\n`;
+      const n = Math.max(2, Math.round(fall / 2.6));
+      let sw = '0%{transform:translateX(-26px) rotate(-35deg)}';
+      for (let j = 1; j < n; j++) sw += `${(parseFloat(p1) * j / n).toFixed(2)}%{transform:translateX(${j % 2 ? 26 : -26}px) rotate(${j % 2 ? 40 : -35}deg)}`;
+      sw += `${p1}%{transform:translateX(0) rotate(${R(0, 360).toFixed(0)}deg) scaleY(.62)}100%{transform:translateX(0) rotate(${R(0, 360).toFixed(0)}deg) scaleY(.62)}`;
+      css += `@keyframes lh${i}{${sw}}\n`;
+      const delay = (-R(0, total)).toFixed(2);
+      d.style.cssText = `left:${R(0, 100).toFixed(1)}%;width:${w.toFixed(1)}px;height:${w.toFixed(1)}px;animation:lg${i} ${total.toFixed(2)}s linear ${delay}s infinite`;
+      svg.style.animation = `lh${i} ${total.toFixed(2)}s ease-in-out ${delay}s infinite`;
+    }
     el.append(d);
   }
+  kf.textContent = css;
 }
+let _lvRz;
+window.addEventListener('resize', () => { clearTimeout(_lvRz); _lvRz = setTimeout(() => { if (window.__LT) buildLeaves(window.__LT); }, 250); });
 
 function buildFx(T) {
   const el = document.getElementById('fx2');
