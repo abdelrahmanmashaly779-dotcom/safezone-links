@@ -56,7 +56,7 @@
     "leavesOn": true,
     "leavesOpacity": "70",
     "leavesSpeed": "3",
-    "leavesCount": "6",
+    "leavesCount": "10",
     "leavesSize": "25",
     "leavesPalette": "green",
     "bgFx": "none",
