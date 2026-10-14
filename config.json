@@ -71,7 +71,7 @@
     "socialGap": "12"
   },
   "announcement": {
-    "enabled": false,
+    "enabled": true,
     "text": "خصومات بمناسبة رجوع الدراسة ",
     "url": ""
   },
