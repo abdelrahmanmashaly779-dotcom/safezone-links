@@ -71,9 +71,9 @@
     "socialGap": "12"
   },
   "announcement": {
-    "enabled": true,
+    "enabled": false,
     "text": "خصومات بمناسبة رجوع الدراسة ",
-    "url": ""
+    "url": "https://safe-zone.store/"
   },
   "countdown": {
     "enabled": false,
