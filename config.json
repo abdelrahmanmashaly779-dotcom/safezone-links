@@ -63,9 +63,9 @@
     "leavesGroundY": "91",
     "leavesGroundDepth": "2",
     "leavesRest": "10",
-    "bgFx": "none",
-    "fxOpacity": "100",
-    "fxSpeed": "5",
+    "bgFx": "snow",
+    "fxOpacity": "94",
+    "fxSpeed": "1",
     "socialX": "0",
     "socialY": "-12",
     "socialGap": "12"
