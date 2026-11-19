@@ -71,7 +71,7 @@
     "socialGap": "12"
   },
   "announcement": {
-    "enabled": true,
+    "enabled": false,
     "text": "عروض الجمعة الخضراء متاحة الأن !",
     "url": "https://safe-zone.store/"
   },
