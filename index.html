@@ -8,7 +8,8 @@
 <link rel="icon" href="data:," id="favicon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap"></noscript>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -45,7 +46,7 @@ a:focus-visible{outline:3px solid #fff;outline-offset:3px}
 
 /* شريط الإعلان */
 .ann{display:block;text-align:center;font-weight:700;font-size:14px;line-height:1.6;
-  background:rgba(0,0,0,.24);border-radius:var(--r);padding:10px 14px;color:#fff}
+  background:#1b5e20;border-radius:var(--r);padding:10px 14px;color:#f5efe0}
 
 /* الهيدر */
 .head{text-align:center;padding:8px 0 4px}
@@ -86,15 +87,16 @@ body[data-ss=circle] .socials a{background:var(--btn);color:var(--btnText)}
 body[data-ss=ring] .socials a{border:2px solid currentColor}
 
 /* العداد */
-.cd{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:16px;text-align:center;
+.cd{font-size:calc(16px*var(--cds,.8));width:min(100%,calc(var(--cds,.8)*100%));margin-inline:auto;
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:1.25em;padding:1em;text-align:center;
   backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:#fff}
-.cd h2{font-size:17px;font-weight:var(--wh);margin-bottom:12px}
-.units{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.u{background:rgba(0,0,0,.22);border-radius:12px;padding:9px 0 7px}
-.u b{display:block;font-size:26px;font-weight:var(--wh);line-height:1.2;font-variant-numeric:tabular-nums}
-.u small{font-size:12px;font-weight:600;opacity:.92}
-.cd .go{display:block;margin-top:12px;background:#fff;color:#1f7a24;border-radius:var(--r);padding:11px;font-weight:800}
-.cd .ended{font-weight:700;padding:6px 0}
+.cd h2{font-size:1.0625em;font-weight:var(--wh);margin-bottom:.75em}
+.units{display:grid;grid-template-columns:repeat(4,1fr);gap:.5em}
+.u{background:rgba(0,0,0,.22);border-radius:.75em;padding:.5625em 0 .4375em}
+.u b{display:block;font-size:1.625em;font-weight:var(--wh);line-height:1.2;font-variant-numeric:tabular-nums}
+.u small{font-size:.75em;font-weight:600;opacity:.92}
+.cd .go{display:block;margin-top:.75em;background:#fff;color:#1f7a24;border-radius:var(--r);padding:.6875em;font-weight:800}
+.cd .ended{font-weight:700;padding:.375em 0}
 
 .hd{font-weight:800;font-size:15px;text-align:center;opacity:.95;margin-top:8px}
 
@@ -237,8 +239,8 @@ const DEFAULT = {
     { type: 'whatsapp', url: '' },
     { type: 'facebook', url: '' }
   ],
-  announcement: { enabled: false, text: '🔥 خصم خاص لفترة محدودة على كل المنتجات', url: '' },
-  countdown: { enabled: false, title: 'العرض بينتهي خلال', end: '', buttonText: 'اطلب دلوقتي', url: 'https://safe-zone.store', hideWhenEnded: true, endedText: 'العرض انتهى' },
+  announcement: { enabled: false, text: '🔥 خصم خاص لفترة محدودة على كل المنتجات', url: '', bg: '#1b5e20', color: '#f5efe0', bgOpacity: '100' },
+  countdown: { enabled: false, title: 'العرض بينتهي خلال', end: '', buttonText: 'اطلب دلوقتي', url: 'https://safe-zone.store', hideWhenEnded: true, endedText: 'العرض انتهى', pos: 'bottom', size: '80' },
   links: [
     { id: 'a1', type: 'link', enabled: true, title: 'للطلب من مصر (متجرنا سيف زوون)', subtitle: '', url: 'https://safe-zone.store', image: DEFAULT_LOGO, badge: '', highlight: false, start: '', end: '' },
     { id: 'a2', type: 'link', enabled: true, title: 'لطلب أرجيفيت فوكس خارج مصر (دول الخليج وغيرها)', subtitle: '', url: '', image: '', badge: '', highlight: false, start: '', end: '' }
@@ -299,6 +301,12 @@ const PREVIEW = params.has('preview');
 const COL = (v, d) => /^#[0-9a-f]{3,8}$/i.test(v || '') ? v : d;
 const NUM = (v, d, mn, mx) => { v = parseFloat(v); return isNaN(v) ? d : Math.min(mx, Math.max(mn, v)); };
 const PICK = (v, list, d) => list.includes(v) ? v : d;
+function hexA(hex, a) {
+  let s = String(hex || '').replace('#', '');
+  if (s.length === 3) s = s.split('').map(x => x + x).join('');
+  const n = parseInt(s.slice(0, 6), 16);
+  return isNaN(n) ? hex : `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
 
 /* رابط حقيقي ولا وهمي/ناقص؟ الوهمي مبيظهرش للزوار */
 function isReal(u) {
@@ -346,9 +354,10 @@ function setupAnalytics(a) {
 let pixelsDone = false;
 function loadPixels(p) {
   if (pixelsDone || PREVIEW) return;
-  pixelsDone = true;
   const meta = (p.meta || '').replace(/\D/g, '');
   const tt = (p.tiktok || '').replace(/[^A-Za-z0-9]/g, '');
+  if (!meta && !tt) return;
+  pixelsDone = true;
   if (meta) {
     !function (f, b, e, v, n, t, s) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments) }; if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s) }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', meta); fbq('track', 'PageView');
@@ -554,7 +563,7 @@ function renderCountdown(c) {
     nums[k] = h('b', {}, '00');
     units.append(h('div', { class: 'u' }, nums[k], h('small', {}, label)));
   });
-  const box = h('section', { class: 'cd cw' },
+  const box = h('section', { class: 'cd cw', style: '--cds:' + (NUM(c.size, 80, 40, 120) / 100) },
     c.title ? h('h2', {}, c.title) : null, units,
     (c.buttonText && isReal(c.url)) ? h('a', { class: 'go', href: safeUrl(c.url), target: '_blank', rel: 'noopener noreferrer' }, c.buttonText) : null);
   const go = box.querySelector('.go'); if (go) go.addEventListener('click', e => e.isTrusted && track('countdown', 'countdown'));
@@ -599,7 +608,8 @@ function render(cfg) {
   if (c.announcement.enabled && c.announcement.text) {
     const a = c.announcement;
     const linked = isReal(a.url);
-    const el = linked ? h('a', { class: 'ann', href: safeUrl(a.url), target: '_blank', rel: 'noopener noreferrer' }, a.text) : h('div', { class: 'ann' }, a.text);
+    const annStyle = `background:${hexA(COL(a.bg, '#1b5e20'), NUM(a.bgOpacity, 100, 0, 100) / 100)};color:${COL(a.color, '#f5efe0')}`;
+    const el = linked ? h('a', { class: 'ann', style: annStyle, href: safeUrl(a.url), target: '_blank', rel: 'noopener noreferrer' }, a.text) : h('div', { class: 'ann', style: annStyle }, a.text);
     if (linked) el.addEventListener('click', e => e.isTrusted && track('announcement', 'announcement'));
     app.append(el);
   }
@@ -622,7 +632,8 @@ function render(cfg) {
     socialPos === 'top' ? socialNav : null));
 
   const cd = renderCountdown(c.countdown);
-  if (cd) app.append(cd);
+  const cdBottom = c.countdown.pos !== 'top';
+  if (cd && !cdBottom) app.append(cd);
 
   const ANIMS = ['pulse', 'heartbeat', 'shake', 'wiggle', 'bounce', 'float', 'glow', 'flash', 'shine', 'swing', 'rubber', 'tada', 'jello', 'rainbow'];
   const hl = PICK(T.btnHighlight, ANIMS, 'pulse');
@@ -643,6 +654,7 @@ function render(cfg) {
     list.append(h('div', { class: 'cw', style: `--i:${idx++}` }, card));
   });
   app.append(list);
+  if (cd && cdBottom) { cd.style.setProperty('--i', idx); app.append(cd); }
   if (socialPos === 'bottom' && socialNav) app.append(socialNav);
 
   loadPixels(c.pixels);
@@ -657,12 +669,29 @@ async function boot() {
     parent.postMessage({ type: 'sz-ready' }, '*');
     return;
   }
-  let cfg = DEFAULT;
+  const KEY = 'sz_cfg_v1';
+  let shown = '', rendered = false;
+  /* آخر نسخة اتحملت بتظهر فوراً، والجديدة بتحل محلها لما توصل */
   try {
-    const r = await fetch('config.json?v=' + Date.now(), { cache: 'no-store' });
-    if (r.ok) cfg = await r.json();
-  } catch (e) { /* يفضل على الإعدادات الافتراضية */ }
-  render(cfg);
+    const old = localStorage.getItem(KEY);
+    if (old) { render(JSON.parse(old)); shown = old; rendered = true; }
+  } catch (e) { }
+  /* لو النت بطيء وأول زيارة: بعد 3 ثواني نعرض النسخة الافتراضية بدل الشاشة الفاضية */
+  const fb = rendered ? 0 : setTimeout(() => { if (!rendered) { render(DEFAULT); rendered = true; } }, 3000);
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 15000);
+  try {
+    const r = await fetch('config.json?v=' + Date.now(), { cache: 'no-store', signal: ctl.signal });
+    if (r.ok) {
+      const txt = await r.text();
+      if (txt !== shown) {
+        const cfg = JSON.parse(txt);
+        render(cfg); shown = txt; rendered = true;
+        try { localStorage.setItem(KEY, txt); } catch (e) { }
+      }
+    }
+  } catch (e) { /* يفضل على الموجود */ }
+  clearTimeout(to); clearTimeout(fb);
+  if (!rendered) render(DEFAULT);
 }
 boot();
 </script>

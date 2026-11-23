@@ -242,8 +242,8 @@ const DEFAULT = {
     { type: 'whatsapp', url: '' },
     { type: 'facebook', url: '' }
   ],
-  announcement: { enabled: false, text: '🔥 خصم خاص لفترة محدودة على كل المنتجات', url: '' },
-  countdown: { enabled: false, title: 'العرض بينتهي خلال', end: '', buttonText: 'اطلب دلوقتي', url: 'https://safe-zone.store', hideWhenEnded: true, endedText: 'العرض انتهى' },
+  announcement: { enabled: false, text: '🔥 خصم خاص لفترة محدودة على كل المنتجات', url: '', bg: '#1b5e20', color: '#f5efe0', bgOpacity: '100' },
+  countdown: { enabled: false, title: 'العرض بينتهي خلال', end: '', buttonText: 'اطلب دلوقتي', url: 'https://safe-zone.store', hideWhenEnded: true, endedText: 'العرض انتهى', pos: 'bottom', size: '80' },
   links: [
     { id: 'a1', type: 'link', enabled: true, title: 'للطلب من مصر (متجرنا سيف زوون)', subtitle: '', url: 'https://safe-zone.store', image: DEFAULT_LOGO, badge: '', highlight: false, start: '', end: '' },
     { id: 'a2', type: 'link', enabled: true, title: 'لطلب أرجيفيت فوكس خارج مصر (دول الخليج وغيرها)', subtitle: '', url: '', image: '', badge: '', highlight: false, start: '', end: '' }
@@ -412,9 +412,15 @@ function buildOffers() {
     h('div', { class: 'group' }, h('h3', {}, 'شريط إعلان أعلى الصفحة'),
       field('إظهار الشريط', a, 'enabled', { type: 'checkbox' }),
       field('نص الإعلان', a, 'text'),
-      field('رابط عند الضغط (اختياري)', a, 'url', { ph: 'https://' })),
+      field('رابط عند الضغط (اختياري)', a, 'url', { ph: 'https://' }),
+      h('div', { class: 'colors' },
+        field('لون الشريط', a, 'bg', { type: 'color' }),
+        field('لون الكتابة', a, 'color', { type: 'color' })),
+      field('شفافية الشريط', a, 'bgOpacity', { type: 'range', min: 0, max: 100, unit: '%', hint: '100% = لون ثابت، وكل ما تقلل بيبقى أشف.' })),
     h('div', { class: 'group' }, h('h3', {}, 'عداد تنازلي'),
       field('إظهار العداد', c, 'enabled', { type: 'checkbox' }),
+      field('مكان العداد', c, 'pos', { type: 'select', options: [['bottom', 'تحت اللينكات'], ['top', 'فوق اللينكات']] }),
+      field('حجم العداد', c, 'size', { type: 'range', min: 40, max: 120, unit: '%' }),
       field('عنوان العداد', c, 'title'),
       field('وقت انتهاء العرض', c, 'end', { type: 'datetime-local', hint: 'بيتحسب بتوقيت جهاز الزائر.' }),
       h('div', { class: 'row2' }, field('نص الزر', c, 'buttonText'), field('رابط الزر', c, 'url', { ph: 'https://' })),
